@@ -322,6 +322,16 @@ await upload.remove(fileID);
 
 ---
 
+## 十一、测试与质量
+
+- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，333 个用例）
+  - 云函数：`npm run test:cloud`（内存 mock 微信云 SDK，覆盖 15 个云函数）
+  - 小程序端工具：`npm run test:client`
+  - 静态/安全/体积/兼容：`npm run test:static`
+- **测试报告**：[docs/TEST_REPORT.md](docs/TEST_REPORT.md)
+- **CI**：`.github/workflows/tests.yml`，push / PR 自动执行 `node --test`
+- **隐私合规（上线前必做）**：菜品图片上传使用 `wx.chooseMedia/chooseImage`，需在微信公众平台「设置 → 服务内容声明 → 用户隐私保护指引」中声明**相册（选择图片）**用途；未配置会导致真机首次调用被拒绝授权。
+
 ## 附录 A：测试数据导入与全流程测试
 
 项目已内置一套覆盖全流程的测试数据，两种导入方式任选其一。目标是让「绑定工号 → 点餐(规格/加料/库存) → 自取/配送下单 → 管理端接单流转 → 营业统计」全部可测。

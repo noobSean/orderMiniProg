@@ -307,7 +307,10 @@ exports.main = async (event, context) => {
         if (!dish) throw new Error('菜品不存在')
         if (dish.available === false) throw new Error('菜品【' + dish.name + '】已下架')
 
-        const qty = (Number(it.qty) > 0) ? Number(it.qty) : 1
+        // 数量必须为正整数：非法值按 1 件，小数向下取整，上限 99
+        let qty = Number(it.qty)
+        if (!isFinite(qty) || qty <= 0) qty = 1
+        qty = Math.min(99, Math.floor(qty))
         let unitPrice = Number(dish.price) || 0
 
         // 规格

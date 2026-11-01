@@ -1,0 +1,15 @@
+{
+  "name": "order-recipe-miniprog",
+  "version": "1.0.0",
+  "private": true,
+  "description": "企业员工点单小程序（微信原生 + 云开发）",
+  "scripts": {
+    "test": "node --test",
+    "test:cloud": "node --test \"tests/cloud/*.test.js\"",
+    "test:client": "node --test \"tests/client/*.test.js\"",
+    "test:static": "node --test \"tests/static/*.test.js\""
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

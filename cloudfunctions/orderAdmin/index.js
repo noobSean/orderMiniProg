@@ -332,7 +332,7 @@ async function checkAdmin(event) {
   return { ok: false, code: 'NEED_ADMIN_LOGIN', message: '管理登录已过期，请重新登录' }
 }
 
-const VALID_STATUS = ['pending', 'making', 'ready', 'done', 'cancelled', 'cancel']
+const VALID_STATUS = ['pending', 'making', 'ready', 'done', 'cancelled']
 // 状态机合法流转
 const TRANSITIONS = {
   pending: ['making', 'cancelled'],
@@ -346,6 +346,25 @@ function canTransit(from, to) {
   if (from === to) return true
   const next = TRANSITIONS[from] || []
   return next.indexOf(to) !== -1
+}
+
+// 取消订单时回补库存：只回补有限库存（stock 为数字）的菜品；失败只记日志、不影响状态变更
+async function restoreStockForCancel(order) {
+  const items = Array.isArray(order && order.items) ? order.items : []
+  for (const it of items) {
+    if (!it || !it.dishId) continue
+    const qty = Math.max(1, Math.floor(Number(it.qty) || 1))
+    try {
+      const dres = await db.collection('dishes').doc(it.dishId).get()
+      const dish = dres && dres.data
+      if (!dish) continue
+      if (typeof dish.stock !== 'number') continue // null/undefined 表示不限库存，无需回补
+      await db.collection('dishes').doc(it.dishId).update({ data: { stock: dish.stock + qty } })
+      console.log('[orderAdmin] stock restored', JSON.stringify({ orderId: order._id, dishId: it.dishId, qty: qty }))
+    } catch (e) {
+      console.log('[orderAdmin] restore stock failed', JSON.stringify({ orderId: order._id, dishId: it.dishId, err: (e && e.message) || '' }))
+    }
+  }
 }
 
 const STATUS_NOTE = {
@@ -365,7 +384,8 @@ exports.main = async (event, context) => {
   const action = event && event.action
   try {
     if (action === 'list') {
-      const status = event.status
+      let status = event.status
+      if (status === 'cancel') status = 'cancelled' // 兼容前端别名
       const since = new Date()
       since.setDate(since.getDate() - 7)
       let q = { createdAt: _.gte(since) }
@@ -386,6 +406,10 @@ exports.main = async (event, context) => {
       if (order.status === 'done' || order.status === 'cancelled') {
         return { ok: false, message: '订单已终态，不可再变更' }
       }
+      if (order.status === status) {
+        // 重复提交同一状态：幂等返回，不再追加历史、不再重复发订阅消息
+        return { ok: true, data: status, noop: true }
+      }
       if (!canTransit(order.status, status)) {
         return { ok: false, message: '状态流转不合法：' + order.status + ' -> ' + status }
       }
@@ -398,6 +422,10 @@ exports.main = async (event, context) => {
       await db.collection('orders').doc(orderId).update({
         data: { status: status, statusHistory: history, updatedAt: db.serverDate() }
       })
+      // 取消订单：回补有限库存（原扣库存逻辑见 submitOrder）
+      if (status === 'cancelled') {
+        await restoreStockForCancel(order)
+      }
       // 订阅消息：自取 →「可取餐提醒」；配送 →「已送达提醒」（用户下单时授权过才成功，失败不影响状态）
       const clientIds = event.subscribeTemplateIds || {}
       if (status === 'ready' && order.type === 'pickup') {
