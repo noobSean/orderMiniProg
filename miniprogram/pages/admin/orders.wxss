@@ -40,3 +40,9 @@
 /* 订单备注 */
 .note-line { align-items: flex-start; }
 .note-text { color: var(--danger); word-break: break-all; }
+
+/* 收款状态 */
+.pay-tag { font-size: 21rpx; padding: 2rpx 10rpx; border-radius: 6rpx; flex-shrink: 0; }
+.pay-tag.unpaid { color: #fff; background: var(--danger); }
+.pay-tag.paid { color: var(--success); background: rgba(7, 193, 96, 0.08); }
+.mini-btn.pay { color: #fff; background: var(--warning); border: none; }

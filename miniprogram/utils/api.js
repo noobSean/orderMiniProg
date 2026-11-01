@@ -61,6 +61,7 @@ async function getMenu() {
     specs: x.specs || [],      // [{name, price}] 可选规格/做法
     extras: x.extras || [],    // [{name, price}] 可加料
     stock: x.stock,            // 数字或 null(不限)
+    soldOut: x.soldOut === true, // 店员快捷售罄标记
     unit: x.unit || '份',
     sort: x.sort
   }));

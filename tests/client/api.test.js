@@ -309,6 +309,7 @@ test('getMenu：客户端直读分类与在售菜品，并补齐默认字段', a
     specs: [],
     extras: [],
     stock: undefined,
+    soldOut: false,
     unit: '份',
     sort: 1
   });

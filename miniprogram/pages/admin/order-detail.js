@@ -93,7 +93,11 @@ Page({
       dept: buyer.dept || o.dept || '',
       location: buyer.location || o.location || '',
       pickupNo: o.pickupNo || '',
-      target: o.target || '',
+      target: (o.delivery && o.delivery.target) || o.target || '',
+      paymentUnpaid: o.paymentStatus === 'unpaid',
+      paymentLabel: o.paymentStatus === 'unpaid' ? '待收款' : '已收款',
+      paidAt: fmtTime(o.paidAt),
+      pickedUpAt: fmtTime(o.pickedUpAt),
       note: (o.delivery && o.delivery.note) || o.note || o.remark || o.notes || '',
       time: fmtTime(o.createTime || o.createdAt || o.time || o.createDate),
       items,
@@ -109,6 +113,9 @@ Page({
     const st = normStatus(o.status);
     const type = o.type === 'delivery' ? 'delivery' : 'pickup';
     const A = [];
+    if (o.paymentStatus === 'unpaid' && st !== 'cancelled') {
+      A.push({ key: 'pay', text: '标记已收款', type: 'pay' });
+    }
     if (st === 'pending') {
       A.push({ key: 'making', text: '接单', type: 'primary' });
       A.push({ key: 'cancel', text: '取消', type: 'danger' });
@@ -117,7 +124,7 @@ Page({
       if (type === 'delivery') A.push({ key: 'ready', text: '配送', type: 'plain' });
       A.push({ key: 'cancel', text: '取消', type: 'danger' });
     } else if (st === 'ready') {
-      A.push({ key: 'done', text: '完成', type: 'primary' });
+      A.push({ key: 'done', text: type === 'delivery' ? '完成' : '已取餐', type: 'primary' });
     }
     return A;
   },
@@ -126,7 +133,11 @@ Page({
     const status = e.currentTarget.dataset.status;
     wx.showLoading({ title: '处理中' });
     try {
-      await api.adminOrders('status', { orderId: this.data.orderId, status });
+      if (status === 'pay') {
+        await api.adminOrders('pay', { orderId: this.data.orderId });
+      } else {
+        await api.adminOrders('status', { orderId: this.data.orderId, status });
+      }
       wx.showToast({ title: '已更新', icon: 'success' });
       this.load();
     } catch (err) {

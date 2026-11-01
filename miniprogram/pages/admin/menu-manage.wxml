@@ -24,6 +24,7 @@
           <view class="row">
             <text class="dish-name ellipsis">{{item.name}}</text>
             <view class="tag avail {{item.available?'on':'off'}}">{{item.available?'在售':'已下架'}}</view>
+            <view wx:if="{{item.soldOut}}" class="tag soldout">售罄</view>
           </view>
           <view class="dish-sub muted">
             ¥{{item.priceText}} / {{item.unit}}
@@ -33,6 +34,7 @@
         </view>
         <view class="row dish-ops">
           <button class="mini-btn plain" data-id="{{item._id}}" catchtap="onToggle">{{item.available?'下架':'上架'}}</button>
+          <button class="mini-btn {{item.soldOut?'primary':'plain'}}" data-id="{{item._id}}" catchtap="onToggleSoldOut">{{item.soldOut?'恢复':'售罄'}}</button>
           <button class="mini-btn primary" data-id="{{item._id}}" catchtap="onEditDish">编辑</button>
         </view>
       </view>

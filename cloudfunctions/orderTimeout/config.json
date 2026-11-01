@@ -1,0 +1,14 @@
+{
+  "triggers": [
+    {
+      "name": "unpaidTimeout",
+      "type": "timer",
+      "config": "0 */5 * * * * *"
+    },
+    {
+      "name": "dailySoldOutReset",
+      "type": "timer",
+      "config": "0 0 4 * * * *"
+    }
+  ]
+}

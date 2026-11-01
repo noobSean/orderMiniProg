@@ -16,7 +16,7 @@
 
     <!-- 右侧菜品 -->
     <scroll-view class="dish-list" scroll-y>
-      <view wx:for="{{catDishes}}" wx:key="_id" class="dish-card" data-id="{{item._id}}" bindtap="onDishTap">
+      <view wx:for="{{catDishes}}" wx:key="_id" class="dish-card {{item.soldOut?'soldout-card':''}}" data-id="{{item._id}}" bindtap="onDishTap">
         <image wx:if="{{item.image}}" class="dish-img" src="{{item.image}}" mode="aspectFill"/>
         <view wx:else class="dish-img placeholder"></view>
         <view class="dish-info">

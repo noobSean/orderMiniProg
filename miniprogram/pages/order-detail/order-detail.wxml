@@ -13,6 +13,12 @@
     </view>
   </view>
 
+  <!-- 支付状态（员工卡线下支付） -->
+  <view wx:if="{{paymentLabel && order.status!=='cancelled'}}" class="card pay-card {{paymentUnpaid?'unpaid':'paid'}}">
+    <view wx:if="{{paymentUnpaid}}" class="pay-hint">待付款：请到店向店员报取餐号，用员工卡付款后取餐</view>
+    <view wx:else class="pay-hint">已付款</view>
+  </view>
+
   <view wx:if="{{canNotify && (order.status==='pending' || order.status==='making' || (isDelivery && order.status==='ready'))}}" class="card notify-card">
     <view class="muted">{{isDelivery ? '配送完成后会通过微信「服务通知」提醒你，请留意查收。' : '餐品制作完成后，会通过微信「服务通知」提醒你取餐。'}}</view>
   </view>
@@ -48,5 +54,6 @@
   <view class="card" wx:if="{{createdAt}}">
     <view class="sec">下单时间</view>
     <view class="muted">{{createdAt}}</view>
+    <view wx:if="{{pickedUpAt}}" class="muted" style="margin-top:8rpx">取餐时间：{{pickedUpAt}}</view>
   </view>
 </view>

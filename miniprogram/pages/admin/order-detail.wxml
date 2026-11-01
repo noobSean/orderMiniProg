@@ -6,6 +6,7 @@
       <view class="between">
         <view class="d-no">{{detail.orderNo}}</view>
         <view class="row head-tags">
+          <view class="tag pay-tag {{detail.paymentUnpaid?'unpaid':'paid'}}">{{detail.paymentLabel}}</view>
           <view class="tag status-tag s-{{detail.statusClass}}">{{detail.statusLabel}}</view>
           <view class="tag type-tag">{{detail.typeLabel}}</view>
         </view>
@@ -53,6 +54,9 @@
     <!-- 备注 / 时间 -->
     <view class="card block">
       <view class="block-title">其他信息</view>
+      <view class="kv"><text class="k">支付状态</text><text class="v">{{detail.paymentLabel}}</text></view>
+      <view class="kv" wx:if="{{detail.paidAt}}"><text class="k">收款时间</text><text class="v">{{detail.paidAt}}</text></view>
+      <view class="kv" wx:if="{{detail.pickedUpAt}}"><text class="k">取餐时间</text><text class="v">{{detail.pickedUpAt}}</text></view>
       <view class="kv"><text class="k">备注</text><text class="v">{{detail.note || '无'}}</text></view>
     </view>
 
@@ -71,7 +75,7 @@
     <!-- 操作按钮（按当前状态） -->
     <view wx:if="{{actions.length}}" class="action-bar">
       <button wx:for="{{actions}}" wx:key="key"
-              class="act {{item.type==='danger' ? 'danger' : (item.type==='plain' ? 'plain' : 'primary')}}"
+              class="act {{item.type==='danger' ? 'danger' : (item.type==='plain' ? 'plain' : (item.type==='pay' ? 'pay' : 'primary'))}}"
               data-status="{{item.key}}" bindtap="onAction">{{item.text}}</button>
     </view>
 

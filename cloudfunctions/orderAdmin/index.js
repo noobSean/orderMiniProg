@@ -419,9 +419,10 @@ exports.main = async (event, context) => {
         time: db.serverDate(),
         note: STATUS_NOTE[status] || ''
       })
-      await db.collection('orders').doc(orderId).update({
-        data: { status: status, statusHistory: history, updatedAt: db.serverDate() }
-      })
+      const patch = { status: status, statusHistory: history, updatedAt: db.serverDate() }
+      // 自取订单完成 = 已取餐核销，记录核销时间便于对账
+      if (status === 'done' && order.type === 'pickup') patch.pickedUpAt = db.serverDate()
+      await db.collection('orders').doc(orderId).update({ data: patch })
       // 取消订单：回补有限库存（原扣库存逻辑见 submitOrder）
       if (status === 'cancelled') {
         await restoreStockForCancel(order)
@@ -434,6 +435,22 @@ exports.main = async (event, context) => {
         sendDeliveryDoneNotice(order, clientIds).catch(function () {})
       }
       return { ok: true, data: status }
+    }
+    // 线下收款标记：员工在 POS 刷卡后，店员在后台标记已收款（不改变制作状态）
+    if (action === 'pay') {
+      const orderId = event.orderId
+      if (!orderId) return { ok: false, message: '缺少 orderId' }
+      const res = await db.collection('orders').doc(orderId).get()
+      const order = res.data
+      if (!order) return { ok: false, message: '订单不存在' }
+      if (order.status === 'cancelled') return { ok: false, message: '订单已取消，不能收款' }
+      if (order.paymentStatus === 'paid') {
+        return { ok: true, data: { paymentStatus: 'paid', noop: true } }
+      }
+      await db.collection('orders').doc(orderId).update({
+        data: { paymentStatus: 'paid', paidAt: db.serverDate(), updatedAt: db.serverDate() }
+      })
+      return { ok: true, data: { paymentStatus: 'paid' } }
     }
     if (action === 'detail') {
       const orderId = event.orderId

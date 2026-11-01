@@ -57,6 +57,7 @@ exports.main = async (event, context) => {
         unit: d.unit || '份',
         sort: num(d.sort, 0),
         available: d.available !== false,
+        soldOut: d.soldOut === true,
         createdAt: db.serverDate()
       }
       const addRes = await db.collection('dishes').add({ data: doc })
@@ -77,6 +78,7 @@ exports.main = async (event, context) => {
       if (event.unit !== undefined) patch.unit = event.unit || '份'
       if (event.sort !== undefined) patch.sort = num(event.sort, 0)
       if (event.available !== undefined) patch.available = event.available !== false
+      if (event.soldOut !== undefined) patch.soldOut = event.soldOut === true
       await db.collection('dishes').doc(id).update({ data: patch })
       return { ok: true, data: { _id: id } }
     }
@@ -92,6 +94,20 @@ exports.main = async (event, context) => {
       }
       await db.collection('dishes').doc(id).update({ data: { available: available } })
       return { ok: true, data: { _id: id, available: available } }
+    }
+    // 快捷售罄/恢复（店员高峰期一键操作，不动库存数字）
+    if (action === 'toggleSoldOut') {
+      const id = idOf(event)
+      if (!id) return { ok: false, message: '缺少菜品 id' }
+      let soldOut
+      if (typeof event.soldOut === 'boolean') {
+        soldOut = event.soldOut
+      } else {
+        const cur = await db.collection('dishes').doc(id).get()
+        soldOut = !(cur.data && cur.data.soldOut === true)
+      }
+      await db.collection('dishes').doc(id).update({ data: { soldOut: soldOut } })
+      return { ok: true, data: { _id: id, soldOut: soldOut } }
     }
     if (action === 'delete') {
       const id = idOf(event)

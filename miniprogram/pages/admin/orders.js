@@ -19,12 +19,15 @@ function fmtTime(v) {
   return util.formatTimeValue(v) || String(v);
 }
 
+const POLL_MS = 15000;
+
 Page({
   data: {
     ready: false,
     fetchError: '',
     tabs: [
       { key: '', label: '全部' },
+      { key: 'unpaid', label: '待收款' },
       { key: 'pending', label: '待接' },
       { key: 'making', label: '制作中' },
       { key: 'ready', label: '可取出' },
@@ -39,20 +42,64 @@ Page({
     // 管理端会话守卫：未登录/过期会跳转登录页，登录成功回到本页
     if (!adminAuth.ensure()) return;
     this.setData({ ready: true });
+    this._knownIds = null;
     this.load();
+    this.startPoll();
   },
 
-  async load() {
-    this.setData({ fetching: true, fetchError: '' });
+  onHide() { this.stopPoll(); },
+  onUnload() { this.stopPoll(); },
+
+  // 订单页自动轮询，店员不手动刷新也能看到新订单
+  startPoll() {
+    this.stopPoll();
+    this._timer = setInterval(() => {
+      if (!this.data.ready) return;
+      this.load({ silent: true });
+    }, POLL_MS);
+  },
+  stopPoll() {
+    if (this._timer) { clearInterval(this._timer); this._timer = null; }
+  },
+
+  async load(opts) {
+    const options = opts || {};
+    if (this._loading) return;
+    this._loading = true;
+    if (!options.silent) this.setData({ fetching: true, fetchError: '' });
     try {
-      const status = this.data.activeTab || undefined;
+      const isUnpaidTab = this.data.activeTab === 'unpaid';
+      const status = (this.data.activeTab && !isUnpaidTab) ? this.data.activeTab : undefined;
       const list = await api.adminOrders('list', { status });
-      this.setData({ orders: (list || []).map(o => this.normOrder(o)) });
+      let orders = (list || []).map(o => this.normOrder(o));
+      if (isUnpaidTab) orders = orders.filter(o => o.paymentUnpaid && o.status !== 'cancelled');
+      this.detectNewOrders(orders);
+      this.setData({ orders, fetchError: '' });
     } catch (err) {
-      this.setData({ fetchError: (err && err.message) || '加载失败' });
-      wx.showToast({ title: this.data.fetchError, icon: 'none' });
+      if (!options.silent) {
+        this.setData({ fetchError: (err && err.message) || '加载失败' });
+        wx.showToast({ title: this.data.fetchError, icon: 'none' });
+      }
     } finally {
-      this.setData({ fetching: false });
+      this._loading = false;
+      if (!options.silent) this.setData({ fetching: false });
+    }
+  },
+
+  // 轮询发现新订单时提示（新订单 = 之前未出现过的 pending 订单）
+  detectNewOrders(orders) {
+    const pendingIds = (orders || []).filter(o => o.status === 'pending').map(o => o._id);
+    const known = this._knownIds;
+    if (!known) {
+      this._knownIds = {};
+      pendingIds.forEach(id => { this._knownIds[id] = true; });
+      return;
+    }
+    const fresh = pendingIds.filter(id => !known[id]);
+    pendingIds.forEach(id => { known[id] = true; });
+    if (fresh.length) {
+      try { wx.vibrateLong({ fail: function () {} }); } catch (e) {}
+      wx.showToast({ title: '有新订单 +' + fresh.length, icon: 'none', duration: 2000 });
     }
   },
 
@@ -66,6 +113,8 @@ Page({
       amount = items.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 1), 0);
     }
     const st = normStatus(o.status);
+    // 历史订单没有 paymentStatus 字段，按已收款处理；新订单显式 unpaid
+    const paymentUnpaid = o.paymentStatus === 'unpaid';
     return {
       _id: o._id,
       orderNo: o.orderNo || o.no || ('NO' + String(o._id || '').slice(-6)),
@@ -74,12 +123,17 @@ Page({
       empNo: buyer.empNo || o.empNo || '',
       dept: buyer.dept || o.dept || '',
       location: buyer.location || o.location || '',
-      target: o.target || o.pickupNo || '',
+      pickupNo: o.pickupNo || '',
+      target: (o.delivery && o.delivery.target) || o.target || o.pickupNo || '',
       note: (o.delivery && o.delivery.note) || o.note || o.remark || o.notes || '',
       amountText: money(amount),
       status: st,
       statusLabel: STATUS[st],
+      doneText: type === 'delivery' ? '完成' : '已取餐',
+      paymentUnpaid: paymentUnpaid,
+      paymentLabel: paymentUnpaid ? '待收款' : '已收款',
       time: fmtTime(o.createTime || o.createdAt || o.time || o.createDate),
+      showPay: paymentUnpaid && st !== 'cancelled',
       showAccept: st === 'pending',
       showMake: st === 'making',
       showDeliver: st === 'making' && type === 'delivery',
@@ -90,11 +144,28 @@ Page({
 
   onTab(e) {
     this.setData({ activeTab: e.currentTarget.dataset.key });
+    this._knownIds = null;
     this.load();
   },
 
   onCard(e) {
     wx.navigateTo({ url: '/pages/admin/order-detail?id=' + e.currentTarget.dataset.id });
+  },
+
+  // 线下收款：员工卡 POS 刷卡后，店员点「收款」
+  async onPay(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    wx.showLoading({ title: '处理中' });
+    try {
+      await api.adminOrders('pay', { orderId: id });
+      wx.showToast({ title: '已标记收款', icon: 'success' });
+      this.load();
+    } catch (err) {
+      wx.showToast({ title: (err && err.message) || '操作失败', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
   },
 
   async onAction(e) {

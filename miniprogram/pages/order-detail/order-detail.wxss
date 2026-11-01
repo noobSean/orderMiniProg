@@ -26,3 +26,11 @@
 
 /* 订阅消息提示 */
 .notify-card { font-size: 24rpx; line-height: 1.6; }
+
+/* 支付状态 */
+.pay-card { padding: 20rpx 24rpx; }
+.pay-card.unpaid { background: #fff7e6; }
+.pay-card.paid { background: #f2fbf5; }
+.pay-hint { font-size: 26rpx; }
+.pay-card.unpaid .pay-hint { color: #ad6800; }
+.pay-card.paid .pay-hint { color: var(--success); }

@@ -355,6 +355,7 @@ exports.main = async (event, context) => {
         const dish = dishRes.data
         if (!dish) throw new Error('菜品不存在')
         if (dish.available === false) throw new Error('菜品【' + dish.name + '】已下架')
+        if (dish.soldOut === true) throw new Error('菜品【' + dish.name + '】今日已售罄')
 
         // 数量必须为正整数：非法值按 1 件，小数向下取整，上限 99
         let qty = Number(it.qty)
@@ -450,6 +451,7 @@ exports.main = async (event, context) => {
         },
         items: orderItems,
         total: round2(total),
+        paymentStatus: 'unpaid',
         delivery: {
           target: deliveryTarget,
           note: note || (delivery.note ? String(delivery.note) : '')
@@ -481,7 +483,8 @@ exports.main = async (event, context) => {
           orderId: addRes._id,
           orderNo: orderNo,
           pickupNo: pickupNo,
-          total: orderDoc.total
+          total: orderDoc.total,
+          paymentStatus: 'unpaid'
         }, orderDoc.discountAmount ? {
           originalTotal: orderDoc.originalTotal,
           discountAmount: orderDoc.discountAmount,

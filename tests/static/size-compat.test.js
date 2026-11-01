@@ -42,7 +42,8 @@ const WX_API_MIN_VERSION = {
   reLaunch: '1.0.0',
   showTabBar: '1.9.0',
   hideTabBar: '1.9.0',
-  stopPullDownRefresh: '1.0.0'
+  stopPullDownRefresh: '1.0.0',
+  vibrateLong: '1.2.0'
 };
 
 // wx.cloud 子 API 最低版本（云开发能力基线 2.2.3）

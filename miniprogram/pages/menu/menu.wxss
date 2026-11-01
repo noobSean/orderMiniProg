@@ -85,3 +85,7 @@
   margin-left: 10rpx;
   vertical-align: middle;
 }
+
+/* 售罄 */
+.tag.soldout { font-size: 20rpx; color: #fff; background: var(--text-weak); border-radius: 6rpx; padding: 0 8rpx; margin-left: 10rpx; }
+.soldout-card { opacity: 0.55; }

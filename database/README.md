@@ -10,13 +10,13 @@
 | --- | --- | --- |
 | settings | 单条门店配置 | storeName, openTime, closeTime, notice, allowSelfPickup, allowDelivery, locations, departments, phone |
 | menu_categories | 菜品分类 | name, sort |
-| dishes | 菜品 | categoryId, name, desc, image(云存储 fileID 或外链 URL), price, specs, extras, stock, unit, sort, available, createdAt |
+| dishes | 菜品 | categoryId, name, desc, image(云存储 fileID 或外链 URL), price, specs, extras, stock, unit, sort, available, soldOut(快捷售罄), createdAt |
 | departments | 科室（医院真实科室） | code, name, pinyin, parentCode, rootCode, rootName, rootSort, level, isRoot, sort, enabled, usage |
 | employees | 员工档案 | openid, empNo, name, dept, location, admin(历史字段，仅展示), createdAt, updatedAt |
 | admin_sessions | 管理端登录会话 | token, openid, expireAt(毫秒时间戳), createdAt |
 | admin_config | 管理端配置（管理密码哈希） | `_id: admin_pwd`, salt, hash, algo(scrypt), updatedAt |
 | promotions | 促销活动（折扣，proto） | name, scopeType(all/category/dish), categoryIds, dishIds, discount(折), rate, startAt, endAt(毫秒), enabled, createdAt, updatedAt |
-| orders | 订单 | orderNo, pickupNo, openid, type, buyer, items, total, delivery, status, statusHistory, createdAt, updatedAt |
+| orders | 订单 | orderNo, pickupNo, openid, type, buyer, items, total, originalTotal, discountAmount, discounts, delivery, status, paymentStatus(unpaid/paid), paidAt, pickedUpAt, cancelReason, statusHistory, createdAt, updatedAt |
 
 > 提示：云函数使用 `cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })`，会自动指向部署所在环境。
 > `admin_sessions` / `admin_config` 由 `adminLogin` 云函数首次登录/首次改密时自动创建（云环境不允许云函数建集合时请手动新建，权限设为「仅云函数可读写」）。
@@ -107,6 +107,15 @@
 - admin_sessions / admin_config：客户端**完全不可读写**（仅云函数可读写），避免管理 token、密码哈希泄露。
 - promotions：**所有登录用户可读、仅云函数可写**（员工端菜单/购物车读取进行中的活动；活动增删改只走管理端 `promoAdmin` 云函数）。
 - 管理员鉴权在云函数端通过 `admin_sessions` 的 token 完成；不要在前端或数据库规则里用 `employees.admin` 判断管理员。
+
+## 七之一、定时任务（orderTimeout）
+
+云函数 `orderTimeout` 通过 `config.json` 配置两个 timer 触发器：
+
+- `unpaidTimeout`：每 5 分钟扫描「pending + paymentStatus=unpaid + 超过 15 分钟」的订单，自动取消并回补有限库存；`cancelReason=unpaid_timeout`，状态历史记录「超时未付款，自动取消」；超时分钟数可用环境变量 `UNPAID_TIMEOUT_MIN` 覆盖。
+- `dailySoldOutReset`：每天 04:00 清除菜品的 `soldOut` 标记（不修改库存数字），让新一天自动恢复在售。
+
+> 部署后在云开发控制台「云函数 → orderTimeout → 定时触发器」确认触发器已创建；触发器时区以云环境为准，必要时调整 cron。
 
 ## 八、内置测试数据（database/seed）
 

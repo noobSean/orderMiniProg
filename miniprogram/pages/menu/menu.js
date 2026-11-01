@@ -140,6 +140,7 @@ Page({
     const id = e.currentTarget.dataset.id;
     const dish = this.data.dishes.find(d => d._id === id);
     if (!dish) return;
+    if (dish.soldOut) return wx.showToast({ title: '今日已售罄', icon: 'none' });
     if ((dish.specs && dish.specs.length) || (dish.extras && dish.extras.length)) {
       this.openSpec(dish);
     } else {

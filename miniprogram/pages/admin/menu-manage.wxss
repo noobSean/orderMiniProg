@@ -19,11 +19,14 @@
 .avail.on { background: var(--primary-weak); color: var(--primary); }
 .avail.off { background: #eef0f3; color: var(--text-weak); }
 .dish-sub { margin-top: 12rpx; font-size: 25rpx; }
-.dish-ops { gap: 12rpx; flex-shrink: 0; }
-.mini-btn { height: 64rpx; line-height: 64rpx; font-size: 26rpx; padding: 0 28rpx; border-radius: 999rpx; margin: 0; box-sizing: border-box; }
+.dish-ops { gap: 8rpx; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; max-width: 300rpx; }
+.mini-btn { height: 56rpx; line-height: 56rpx; font-size: 24rpx; padding: 0 18rpx; border-radius: 999rpx; margin: 0; box-sizing: border-box; }
 .mini-btn.primary { background: var(--primary); color: #fff; }
 .mini-btn.plain { background: #fff; color: var(--primary); border: 2rpx solid var(--primary); line-height: 60rpx; }
 
 .mini-btn::after { border: none; }
 
 .empty { text-align: center; padding: 120rpx 0; }
+
+/* 快捷售罄 */
+.tag.soldout { font-size: 20rpx; color: #fff; background: var(--text-weak); border-radius: 6rpx; padding: 0 8rpx; margin-left: 8rpx; }

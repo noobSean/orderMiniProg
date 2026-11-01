@@ -51,6 +51,7 @@ Page({
       priceText: money(d.price),
       unit: d.unit || '份',
       available: d.available !== false,
+      soldOut: d.soldOut === true,
       specCount: (d.specs || []).length,
       extraCount: (d.extras || []).length
     };
@@ -67,6 +68,22 @@ Page({
     const id = e.currentTarget.dataset.id;
     this.setData({ activeCat: id });
     this.refreshDisplay(id);
+  },
+
+  // 快捷售罄/恢复：高峰期一键操作，不改库存数字
+  async onToggleSoldOut(e) {
+    const id = e.currentTarget.dataset.id;
+    const dish = this.data.allDishes.find(d => d._id === id);
+    wx.showLoading({ title: '处理中' });
+    try {
+      await api.dishAdmin('toggleSoldOut', { dishId: id, soldOut: dish ? !dish.soldOut : undefined });
+      wx.showToast({ title: '已更新', icon: 'success' });
+      this.load();
+    } catch (err) {
+      wx.showToast({ title: (err && err.message) || '操作失败', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
   },
 
   async onToggle(e) {
