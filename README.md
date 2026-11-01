@@ -82,7 +82,7 @@ order_recipe_miniprog/
 
 ## 三、创建集合与初始数据
 
-按 `database/README.md` 的说明，在云开发控制台「数据库」创建 7 个集合：
+按 `database/README.md` 的说明，在云开发控制台「数据库」创建 8 个集合：
 `settings`、`menu_categories`、`dishes`、`departments`、`employees`、`orders`、`admin_sessions`、`admin_config`。
 
 > `admin_sessions` 保存管理端登录会话，`admin_config` 保存管理密码哈希（`adminLogin` 首次登录/首次改密时会尝试自动创建；若云环境不允许云函数建集合，请手动新建，权限均设为「仅云函数可读写」）。
