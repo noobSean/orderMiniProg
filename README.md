@@ -312,6 +312,13 @@ await upload.remove(fileID);
 
 > `subscribeCheck` 是独立的云函数，部署它不影响 `submitOrder`。
 
+> **注意：`{"action":"ping"}` 只内置在 `submitOrder` 和 `orderAdmin` 两个函数**（用于部署自检）。
+> 如果你在其它云函数（如 `adminLogin`、`subscribeCheck`、`settingsAdmin`、`dishAdmin` 等）里测试，会返回 `{"ok":false,"message":"未知 action: ping"}`——这是该函数不认识这个 action，属正常现象，**不代表部署失败**。
+> 若在 `submitOrder` / `orderAdmin` 里测试仍返回「未知 action: ping」，说明云端还是旧版本代码：重新「上传并部署：云端安装依赖」该函数目录，确认控制台代码里包含 `action === 'ping'`，再测应返回：
+> ```json
+> {"ok":true,"data":{"pong":true,"fn":"orderAdmin","version":"notify-inline-v1","now":"..."}}
+> ```
+
 ## 十、上线前必改项（安全）
 
 - 在云函数 `adminLogin` 的**环境变量**中配置强口令 `ADMIN_PWD`（不要写进代码或小程序端）。
