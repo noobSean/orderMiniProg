@@ -126,7 +126,7 @@
 
 稳定性：连续 3 次执行结果一致；测试不依赖网络、真实时间、随机值（随机仅做格式断言），单文件可独立运行。并在 Node 24 / Node 22、UTC 时区（模拟 GitHub Actions）下各执行一遍，均为 345/345。
 
-> CI 验证：GitHub Actions `tests` workflow 在 commit `37f0c52` 上运行通过（Node 22 / ubuntu-latest，345/345），运行 ID `41261980069`。
+> CI 验证：GitHub Actions `tests` workflow 在 commit `3298819`（管理密码模块）上运行通过（Node 22 / ubuntu-latest，345/345），运行 ID `41263136235`。
 
 ---
 
