@@ -27,6 +27,12 @@ function change(item, step, qty) {
 function setItemQty(item, qty) { return change(item, 0, qty); }
 function add(item) { return change(item, 1); }
 function remove(item) { return change(item, -1); }
+// 移除某个菜品（所有规格/加料组合），用于菜单已删除/下架后的脏购物车清理
+function removeDish(dishId) {
+  const list = loadCart().filter(i => String(i.dishId) !== String(dishId));
+  saveCart(list);
+  return list;
+}
 function clear() { wx.removeStorageSync(KEY); return []; }
 function totalQty(list) {
   return (list || loadCart()).reduce((s, i) => s + i.qty, 0);
@@ -34,4 +40,4 @@ function totalQty(list) {
 function totalAmount(list) {
   return (list || loadCart()).reduce((s, i) => s + i.qty * i.price, 0);
 }
-module.exports = { loadCart, add, remove, setItemQty, clear, totalQty, totalAmount };
+module.exports = { loadCart, add, remove, setItemQty, removeDish, clear, totalQty, totalAmount };

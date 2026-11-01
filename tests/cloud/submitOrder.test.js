@@ -251,6 +251,8 @@ test('submitOrder: 菜品不存在返回 ok:false，事务回滚（库存全部�
   })
   assert.equal(res.ok, false)
   assert.match(res.message, /菜品不存在/)
+  assert.equal(res.code, 'DISH_NOT_FOUND')
+  assert.equal(res.dishId, 'dish_missing')
   assert.equal(s.doc('dishes', 'dish_1').stock, 10, '回滚后库存应恢复')
   assert.equal(s.count('orders'), 0)
 })

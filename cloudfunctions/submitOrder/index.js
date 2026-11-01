@@ -351,9 +351,26 @@ exports.main = async (event, context) => {
 
       for (const it of items) {
         if (!it || !it.dishId) throw new Error('菜品缺少 dishId')
-        const dishRes = await transaction.collection('dishes').doc(it.dishId).get()
-        const dish = dishRes.data
-        if (!dish) throw new Error('菜品不存在')
+        let dishRes
+        try {
+          dishRes = await transaction.collection('dishes').doc(it.dishId).get()
+        } catch (e) {
+          // 真实云 SDK 在文档不存在时会抛错（不是返回 data:null），这里转成可读的缺菜错误；
+          // 其它数据库错误（网络/权限等）保持原样抛出，便于排查
+          const msg = String((e && (e.message || e.errMsg)) || '')
+          if (!/does not exist|not exist|不存在|document\.get:fail/i.test(msg)) throw e
+          const err = new Error('菜品不存在或已删除（' + (it.name || it.dishId) + '），请刷新菜单后重试')
+          err.code = 'DISH_NOT_FOUND'
+          err.dishId = it.dishId
+          throw err
+        }
+        const dish = dishRes && dishRes.data
+        if (!dish) {
+          const err = new Error('菜品不存在或已删除（' + (it.name || it.dishId) + '），请刷新菜单后重试')
+          err.code = 'DISH_NOT_FOUND'
+          err.dishId = it.dishId
+          throw err
+        }
         if (dish.available === false) throw new Error('菜品【' + dish.name + '】已下架')
         if (dish.soldOut === true) throw new Error('菜品【' + dish.name + '】今日已售罄')
 
@@ -496,6 +513,9 @@ exports.main = async (event, context) => {
       throw err
     }
   } catch (e) {
-    return { ok: false, message: (e && e.message) || '下单失败' }
+    const out = { ok: false, message: (e && e.message) || '下单失败' }
+    if (e && e.code) out.code = e.code
+    if (e && e.dishId) out.dishId = e.dishId
+    return out
   }
 }

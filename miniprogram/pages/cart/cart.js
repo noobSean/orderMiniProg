@@ -137,6 +137,18 @@ Page({
     }).catch(err => {
       wx.hideLoading();
       this.setData({ submitting: false });
+      // 菜品已删除/不存在：自动移除脏购物车条目，提示刷新菜单
+      if (err && err.code === 'DISH_NOT_FOUND') {
+        if (err.dishId) store.removeDish(err.dishId);
+        this.refresh();
+        wx.showModal({
+          title: '菜品已失效',
+          content: (err.message || '菜品已不存在') + '\n已从购物车移除，请刷新菜单后重新选择。',
+          showCancel: false,
+          confirmText: '知道了'
+        });
+        return;
+      }
       wx.showToast({ title: (err && err.message) || '下单失败', icon: 'none' });
     });
   }

@@ -25,6 +25,7 @@ function call(name, data) {
     if (r.ok === false) {
       const err = new Error(r.message || '操作失败');
       err.code = r.code || '';
+      if (r.dishId) err.dishId = r.dishId;
       if (r.code === 'NEED_ADMIN_LOGIN') adminAuth.clear();
       return Promise.reject(err);
     }

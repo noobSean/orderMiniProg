@@ -111,3 +111,15 @@ test('loadCart：可恢复本地已保存的购物车；读取异常时返回空
   mock.wx.getStorageSync = function () { throw new Error('storage broken'); };
   assert.deepEqual(store.loadCart(), []);
 });
+
+
+test('removeDish：按 dishId 移除所有规格/加料组合', () => {
+  store.clear();
+  store.add(dish({ dishId: 'd1' }));
+  store.add(dish({ dishId: 'd1', spec: '大份' }));
+  store.add(dish({ dishId: 'd2' }));
+  const list = store.removeDish('d1');
+  assert.equal(list.length, 1);
+  assert.equal(list[0].dishId, 'd2');
+  assert.equal(store.loadCart().length, 1);
+});
