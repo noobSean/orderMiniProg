@@ -137,7 +137,7 @@
 
 稳定性：连续 3 次执行结果一致；测试不依赖网络、真实时间、随机值（随机仅做格式断言），单文件可独立运行。并在 Node 24 / Node 22、UTC 时区（模拟 GitHub Actions）下各执行一遍，均为 384/384（当时 345，后续促销/P0 增至 384）。
 
-> CI 验证：既有提交在 GitHub Actions 上通过（Node 22 / ubuntu-latest）；促销与 P0 新增后本地 **383/383** 通过，待 GitHub 网络恢复推送后由 CI 复跑。
+> CI 验证：GitHub Actions `tests` workflow 在 commit `846e8b6`（含促销、P0、缺菜修复）上运行通过（Node 22 / ubuntu-latest，**384/384**），运行 ID `41287920603`。
 
 ---
 
