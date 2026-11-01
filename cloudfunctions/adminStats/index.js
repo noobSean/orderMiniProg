@@ -25,9 +25,10 @@ exports.main = async (event, context) => {
     const now = new Date()
     if (mode === 'range') {
       from = event && event.from ? new Date(event.from) : new Date(now.getFullYear(), now.getMonth(), now.getDate())
-      to = event && event.to ? new Date(event.to) : now
+      // to 缺省/非法时兜底为「现在（含当前毫秒）」：+1ms 避免与同毫秒创建的订单擦边被排除
+      to = event && event.to ? new Date(event.to) : new Date(now.getTime() + 1)
       if (isNaN(from.getTime())) from = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-      if (isNaN(to.getTime())) to = now
+      if (isNaN(to.getTime())) to = new Date(now.getTime() + 1)
     } else {
       from = new Date(now.getFullYear(), now.getMonth(), now.getDate())
       to = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)

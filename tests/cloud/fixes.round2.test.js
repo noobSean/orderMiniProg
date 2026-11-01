@@ -124,3 +124,19 @@ test('submitOrder：数量小数向下取整（1.5 -> 1），库存与订单数�
   assert.equal(s.doc('dishes', 'dish_1').stock, 9, '1.5 应向下取整为 1')
   assert.equal(s.doc('orders', res.data.orderId).items[0].qty, 1)
 })
+
+test('adminStats：range 非法 from/to 兜底统计包含同毫秒创建的订单', async () => {
+  const now = new Date()
+  const stats = createScenario({
+    fn: 'adminStats',
+    openid: 'openid_admin',
+    seed: {
+      admin_sessions: [makeSession({ token: TOKEN, expireAt: Date.now() + 3600000 })],
+      orders: [{ _id: 'o_now', orderNo: 'O1', openid: 'o', type: 'pickup', status: 'pending', total: 12.3, items: [], createdAt: now }]
+    }
+  })
+  const res = await stats.call({ mode: 'range', from: 'not-a-date', to: 'also-bad', adminToken: TOKEN })
+  assert.equal(res.ok, true)
+  assert.equal(res.data.orderCount, 1, '同毫秒订单不应被 to 边界排除')
+  assert.equal(res.data.totalAmount, 12.3)
+})

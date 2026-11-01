@@ -133,11 +133,12 @@ node --test tests/cloud/submitOrder.test.js
 
 ## Lead 修复记录（第二轮）
 
-以下缺陷已由 Lead 修复并补充回归用例（`tests/cloud/fixes.round2.test.js`，7 条）：
+以下缺陷已由 Lead 修复并补充回归用例（`tests/cloud/fixes.round2.test.js`，8 条）：
 
 1. ✅ 取消订单回补有限库存（`orderAdmin` 新增 `restoreStockForCancel`；`stock` 为 null 不回补）。
 2. ✅ 同状态重复提交幂等 no-op（不再追加历史、不再重复发送订阅消息）。
 3. ✅ `list` 支持 `status:'cancel'` 别名过滤（统一归一化为 `cancelled`）。
 4. ✅ `submitOrder` 数量小数向下取整（上限 99，非法值按 1 件）。
+5. ✅ `adminStats` range 兜底 `to` 改为 `now + 1ms`，修复同毫秒边界丢单（CI 首次运行暴露）。
 
 其余观察项（orderDetail 不存在分支、settingsAdmin createdAt、pickupNo 并发、分类删除引用、adminStats 1000 上限等）保留为已知风险，见 `docs/TEST_REPORT.md` 第九节。
