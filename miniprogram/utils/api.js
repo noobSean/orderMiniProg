@@ -37,6 +37,12 @@ function call(name, data) {
   });
 }
 
+// 业务时区（东八区）当天 YYYYMMDD：售罄只对当天有效，第二天自动恢复
+function cstDay(ts) {
+  const date = new Date((typeof ts === 'number' ? ts : Date.now()) + 8 * 3600 * 1000);
+  return '' + date.getUTCFullYear() + String(date.getUTCMonth() + 1).padStart(2, '0') + String(date.getUTCDate()).padStart(2, '0');
+}
+
 function db() {
   if (!wx.cloud) throw new Error('请在真机或开发者工具中开通云开发');
   return wx.cloud.database();
@@ -62,7 +68,7 @@ async function getMenu() {
     specs: x.specs || [],      // [{name, price}] 可选规格/做法
     extras: x.extras || [],    // [{name, price}] 可加料
     stock: x.stock,            // 数字或 null(不限)
-    soldOut: x.soldOut === true, // 店员快捷售罄标记
+    soldOut: x.soldOut === true && (!x.soldOutDate || String(x.soldOutDate) === cstDay()), // 快捷售罄（仅当天有效）
     unit: x.unit || '份',
     sort: x.sort
   }));

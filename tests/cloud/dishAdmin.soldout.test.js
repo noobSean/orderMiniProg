@@ -31,6 +31,7 @@ test('dishAdmin/toggleSoldOut: 一键售罄/恢复，不影响库存与上下架
   let res = await call(s, { action: 'toggleSoldOut', dishId: 'd1' })
   assert.equal(res.ok, true)
   assert.equal(s.doc('dishes', 'd1').soldOut, true)
+  assert.match(String(s.doc('dishes', 'd1').soldOutDate), /^\d{8}$/)
   assert.equal(s.doc('dishes', 'd1').stock, 10)
   assert.equal(s.doc('dishes', 'd1').available, true)
 
@@ -59,4 +60,19 @@ test('dishAdmin/create/update: 支持 soldOut 字段', async () => {
   res = await call(s, { action: 'update', dishId: 'd1', soldOut: true })
   assert.equal(res.ok, true)
   assert.equal(s.doc('dishes', 'd1').soldOut, true)
+})
+
+test('dishAdmin/list: soldOutActive 只认当天售罄，昨天的标记自动失效', async () => {
+  const s = scenario()
+  s.mock.insert('dishes', { _id: 'd_expired', categoryId: 'c1', name: '昨日售罄', price: 10, stock: 5, available: true, soldOut: true, soldOutDate: '20000101', specs: [], extras: [], sort: 1 })
+  s.mock.insert('dishes', { _id: 'd_today', categoryId: 'c1', name: '今日售罄', price: 10, stock: 5, available: true, soldOut: true, sort: 2, soldOutDate: (function () {
+    const t = new Date(Date.now() + 8 * 3600 * 1000)
+    return '' + t.getUTCFullYear() + String(t.getUTCMonth() + 1).padStart(2, '0') + String(t.getUTCDate()).padStart(2, '0')
+  })(), specs: [], extras: [] })
+  const res = await call(s, { action: 'list' })
+  assert.equal(res.ok, true)
+  const byId = {}
+  res.data.forEach(x => { byId[x._id] = x })
+  assert.equal(byId.d_today.soldOutActive, true)
+  assert.equal(byId.d_expired.soldOutActive, false)
 })

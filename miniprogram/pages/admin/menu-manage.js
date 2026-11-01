@@ -51,7 +51,7 @@ Page({
       priceText: money(d.price),
       unit: d.unit || '份',
       available: d.available !== false,
-      soldOut: d.soldOut === true,
+      soldOut: (d.soldOutActive !== undefined) ? d.soldOutActive === true : (d.soldOut === true),
       specCount: (d.specs || []).length,
       extraCount: (d.extras || []).length
     };

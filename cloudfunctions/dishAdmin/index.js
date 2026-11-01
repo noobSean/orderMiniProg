@@ -20,6 +20,20 @@ function num(v, def) {
   return isNaN(n) ? def : n
 }
 
+// 业务时区（东八区）当天 YYYYMMDD；售罄只对当天有效，第二天自动失效，无需定时器
+function cstDay(ts) {
+  const date = new Date((ts === undefined || ts === null ? Date.now() : Number(ts)) + 8 * 3600 * 1000)
+  const y = date.getUTCFullYear()
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const dd = String(date.getUTCDate()).padStart(2, '0')
+  return y + m + dd
+}
+function soldOutActive(dish, ts) {
+  if (!dish || dish.soldOut !== true) return false
+  if (!dish.soldOutDate) return true
+  return String(dish.soldOutDate) === cstDay(ts)
+}
+
 // id 兼容 dishId 与 _id
 function idOf(e, extra) {
   if (e && e.dishId) return e.dishId
@@ -34,7 +48,10 @@ exports.main = async (event, context) => {
   try {
     if (action === 'list') {
       const res = await db.collection('dishes').orderBy('sort', 'asc').limit(1000).get()
-      return { ok: true, data: res.data || [] }
+      const list = (res.data || []).map(function (x) {
+        return Object.assign({}, x, { soldOutActive: soldOutActive(x) })
+      })
+      return { ok: true, data: list }
     }
     if (action === 'get') {
       const id = idOf(event)
@@ -58,6 +75,7 @@ exports.main = async (event, context) => {
         sort: num(d.sort, 0),
         available: d.available !== false,
         soldOut: d.soldOut === true,
+        soldOutDate: d.soldOut === true ? cstDay() : '',
         createdAt: db.serverDate()
       }
       const addRes = await db.collection('dishes').add({ data: doc })
@@ -78,7 +96,10 @@ exports.main = async (event, context) => {
       if (event.unit !== undefined) patch.unit = event.unit || '份'
       if (event.sort !== undefined) patch.sort = num(event.sort, 0)
       if (event.available !== undefined) patch.available = event.available !== false
-      if (event.soldOut !== undefined) patch.soldOut = event.soldOut === true
+      if (event.soldOut !== undefined) {
+        patch.soldOut = event.soldOut === true
+        patch.soldOutDate = event.soldOut === true ? cstDay() : ''
+      }
       await db.collection('dishes').doc(id).update({ data: patch })
       return { ok: true, data: { _id: id } }
     }
@@ -106,8 +127,8 @@ exports.main = async (event, context) => {
         const cur = await db.collection('dishes').doc(id).get()
         soldOut = !(cur.data && cur.data.soldOut === true)
       }
-      await db.collection('dishes').doc(id).update({ data: { soldOut: soldOut } })
-      return { ok: true, data: { _id: id, soldOut: soldOut } }
+      await db.collection('dishes').doc(id).update({ data: { soldOut: soldOut, soldOutDate: soldOut ? cstDay() : '' } })
+      return { ok: true, data: { _id: id, soldOut: soldOut, soldOutDate: soldOut ? cstDay() : '' } }
     }
     if (action === 'delete') {
       const id = idOf(event)

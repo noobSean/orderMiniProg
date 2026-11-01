@@ -273,6 +273,20 @@ async function sendOrderPlacedNotice(order, event) {
   })
 }
 
+// 业务时区（东八区）当天 YYYYMMDD；售罄标记只对当天有效
+function cstDay(ts) {
+  const date = new Date((ts === undefined || ts === null ? Date.now() : Number(ts)) + 8 * 3600 * 1000)
+  const y = date.getUTCFullYear()
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const d = String(date.getUTCDate()).padStart(2, '0')
+  return y + m + d
+}
+function soldOutToday(dish) {
+  if (!dish || dish.soldOut !== true) return false
+  if (!dish.soldOutDate) return true
+  return String(dish.soldOutDate) === cstDay()
+}
+
 // ==================== 促销/折扣（proto） ====================
 // 规则：同一菜品命中多个活动时取折扣力度最大的一个（不叠加）；折扣按分四舍五入。
 function round2(n) { return Math.round((Number(n) || 0) * 100) / 100 }
@@ -372,7 +386,7 @@ exports.main = async (event, context) => {
           throw err
         }
         if (dish.available === false) throw new Error('菜品【' + dish.name + '】已下架')
-        if (dish.soldOut === true) throw new Error('菜品【' + dish.name + '】今日已售罄')
+        if (soldOutToday(dish)) throw new Error('菜品【' + dish.name + '】今日已售罄')
 
         // 数量必须为正整数：非法值按 1 件，小数向下取整，上限 99
         let qty = Number(it.qty)

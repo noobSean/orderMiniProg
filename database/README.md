@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | settings | 单条门店配置 | storeName, openTime, closeTime, notice, allowSelfPickup, allowDelivery, locations, departments, phone |
 | menu_categories | 菜品分类 | name, sort |
-| dishes | 菜品 | categoryId, name, desc, image(云存储 fileID 或外链 URL), price, specs, extras, stock, unit, sort, available, soldOut(快捷售罄), createdAt |
+| dishes | 菜品 | categoryId, name, desc, image(云存储 fileID 或外链 URL), price, specs, extras, stock, unit, sort, available, soldOut(快捷售罄), soldOutDate(售罄日期 YYYYMMDD，跨日自动失效), createdAt |
 | departments | 科室（医院真实科室） | code, name, pinyin, parentCode, rootCode, rootName, rootSort, level, isRoot, sort, enabled, usage |
 | employees | 员工档案 | openid, empNo, name, dept, location, admin(历史字段，仅展示), createdAt, updatedAt |
 | admin_sessions | 管理端登录会话 | token, openid, expireAt(毫秒时间戳), createdAt |
@@ -113,7 +113,7 @@
 云函数 `orderTimeout` 通过 `config.json` 配置两个 timer 触发器：
 
 - `unpaidTimeout`：每 5 分钟扫描「pending + paymentStatus=unpaid + 超过 15 分钟」的订单，自动取消并回补有限库存；`cancelReason=unpaid_timeout`，状态历史记录「超时未付款，自动取消」；超时分钟数可用环境变量 `UNPAID_TIMEOUT_MIN` 覆盖。
-- `dailySoldOutReset`：每天 04:00 清除菜品的 `soldOut` 标记（不修改库存数字），让新一天自动恢复在售。
+- `dailySoldOutReset`：每天 04:00 清除菜品的 `soldOut` 标记（**可选**；售罄标记带 `soldOutDate`，按东八区自然日自动失效，不配触发器第二天也会恢复在售）。
 
 > 部署后在云开发控制台「云函数 → orderTimeout → 定时触发器」确认触发器已创建；触发器时区以云环境为准，必要时调整 cron。
 
