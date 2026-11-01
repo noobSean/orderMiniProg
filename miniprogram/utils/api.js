@@ -133,6 +133,12 @@ function adminLogin(payload) {
 // 校验管理会话是否有效（token 缺省取本地会话）
 function adminVerify(token) { return call('adminLogin', { action: 'verify', token: token || adminAuth.token() }); }
 
+// 修改管理密码（需已登录）。成功后云端会使所有管理会话失效，需用新密码重新登录。
+// oldPwd/newPwd：6-32 位、不能含空格；服务端 scrypt 加盐哈希存储。
+function adminChangePwd(oldPwd, newPwd) {
+  return call('adminLogin', { action: 'changePwd', oldPwd: oldPwd, newPwd: newPwd });
+}
+
 // 注销管理会话（云端删除 + 本地清除）
 function adminLogout() {
   const token = adminAuth.token();
@@ -167,6 +173,7 @@ module.exports = {
   orderDetail,
   adminLogin,
   adminVerify,
+  adminChangePwd,
   adminLogout,
   employeeAdmin,
   adminOrders,

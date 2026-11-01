@@ -21,7 +21,7 @@ order_recipe_miniprog/
 │  ├─ submitOrder/
 │  ├─ myOrders/
 │  ├─ orderDetail/
-│  ├─ adminLogin/              # 管理口令登录，签发管理端会话 token（admin_sessions）
+│  ├─ adminLogin/              # 管理口令登录/修改（scrypt 哈希存 admin_config），签发管理端会话 token（admin_sessions）
 │  ├─ employeeAdmin/           # 员工绑定管理（搜索 / 解绑，释放工号）
 │  ├─ orderAdmin/
 │  ├─ dishAdmin/
@@ -34,7 +34,7 @@ order_recipe_miniprog/
 │  └─ rules.json
 └─ miniprogram/                 # 小程序前端
    ├─ app.js / app.json / app.wxss
-   ├─ config/index.js           # 云环境 envId（管理口令只存在云函数里）
+   ├─ config/index.js           # 云环境 envId（管理口令只由云函数校验/哈希存储，不写进小程序端）
    ├─ utils/api.js              # 数据访问层（前后端契约，自动附带管理会话 token）
    ├─ utils/adminAuth.js        # 管理后台会话（本地缓存 + 页面守卫）
    ├─ utils/upload.js           # 图片等静态资源上传（云存储）
@@ -67,7 +67,11 @@ order_recipe_miniprog/
    };
    ```
 
-> 管理口令**不保存在小程序端、也不写进代码仓库**：只配置在云函数 `adminLogin` 的**环境变量** `ADMIN_PWD`（云开发控制台 → 云函数 → adminLogin → 配置 → 环境变量）。未配置时管理后台会提示「管理口令未配置」。
+> 管理口令**不保存在小程序端、也不写进代码仓库**，支持两种来源（数据库优先）：
+> 1. **数据库** `admin_config/admin_pwd`：管理后台「修改密码」后写入（scrypt 加盐哈希，不存明文）；
+> 2. **云函数环境变量** `ADMIN_PWD`：首次部署的初始化口令，只有数据库没有记录时生效。
+>
+> 首次使用：先在云函数 `adminLogin` 配置环境变量 `ADMIN_PWD`，登录管理后台后在「修改密码」里改成自己的强密码（改完环境变量不再参与校验，所有设备需重新登录）。忘记密码：在云开发控制台删除 `admin_config` 集合中的 `admin_pwd` 记录，即可重新用环境变量口令登录/重置。
 
 > **UI 注意**：微信基础组件在 `style: "v2"` 下会给 `button` 注入固定宽度（184px）和 auto 外边距，容易把同行文字挤没或让按钮溢出。`miniprogram/app.wxss` 里已统一重置（`button { width: auto !important; ... }`）；新增按钮样式如需固定宽度，请在自己的类里用 `width: ... !important` 显式覆盖。
 
@@ -76,9 +80,9 @@ order_recipe_miniprog/
 ## 三、创建集合与初始数据
 
 按 `database/README.md` 的说明，在云开发控制台「数据库」创建 7 个集合：
-`settings`、`menu_categories`、`dishes`、`departments`、`employees`、`orders`、`admin_sessions`。
+`settings`、`menu_categories`、`dishes`、`departments`、`employees`、`orders`、`admin_sessions`、`admin_config`。
 
-> `admin_sessions` 用于保存管理端登录会话（`adminLogin` 云函数首次登录时会尝试自动创建；若云环境不允许云函数建集合，请手动新建，权限设为「仅云函数可读写」）。
+> `admin_sessions` 保存管理端登录会话，`admin_config` 保存管理密码哈希（`adminLogin` 首次登录/首次改密时会尝试自动创建；若云环境不允许云函数建集合，请手动新建，权限均设为「仅云函数可读写」）。
 
 - **推荐直接导入本项目内置测试数据**（见文末「附录 A」），无需手写。
 - 也可手动写入：`settings` 一条门店配置；`menu_categories`、`dishes` 示例菜品（见 `database/README.md`）。
@@ -91,7 +95,7 @@ order_recipe_miniprog/
 ## 四、部署云函数
 
 1. 在开发者工具中右键 `cloudfunctions` 下的每个函数目录 → **「上传并部署：云端安装依赖」**（逐一执行；或对 `cloudfunctions` 整体右键 → 上传全部）。
-2. 部署完成后，**任何微信**都可以在「我的」页面看到「管理后台」入口（**不需要先绑定员工账号**），输入管理口令即可进入管理后台；登录会话 12 小时有效，首页底部可「退出管理登录」。
+2. 部署完成后，**任何微信**都可以在「我的」页面看到「管理后台」入口（**不需要先绑定员工账号**），输入管理口令即可进入管理后台；登录会话 12 小时有效，首页底部可「退出管理登录」，首页「修改密码」可修改管理密码。
 3. 管理端权限由 `admin_sessions` 会话 token 校验，与员工档案、`employees.admin` 字段无关。
 
 ---
@@ -321,7 +325,7 @@ await upload.remove(fileID);
 
 ## 十、上线前必改项（安全）
 
-- 在云函数 `adminLogin` 的**环境变量**中配置强口令 `ADMIN_PWD`（不要写进代码或小程序端）。
+- 先在云函数 `adminLogin` 的**环境变量**配置初始口令 `ADMIN_PWD`（不要写进代码或小程序端），登录管理后台后在「修改密码」里改成自己的强密码；之后数据库哈希优先，环境变量仅作初始化/重置兜底。
 - 云函数内所有管理接口都用 `adminToken` 会话校验（`checkAdmin`），请勿移除；`admin_sessions` 集合权限设为「仅云函数可读写」。
 - 管理会话默认 12 小时，可在 `adminLogin/index.js` 的 `SESSION_TTL` 调整。
 - 云存储权限保持「所有用户可读，仅创建者可写」；定期清理 `dishes/` 下的孤儿文件（可选）。
@@ -331,7 +335,7 @@ await upload.remove(fileID);
 
 ## 十一、测试与质量
 
-- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，334 个用例）
+- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，345 个用例）
   - 云函数：`npm run test:cloud`（内存 mock 微信云 SDK，覆盖 15 个云函数）
   - 小程序端工具：`npm run test:client`
   - 静态/安全/体积/兼容：`npm run test:static`
@@ -390,7 +394,7 @@ await upload.remove(fileID);
 4. **自取下单**：购物车选「自取」→ 提交 → 详情页显示取餐号。
 5. **配送下单**：再来一单选「配送」→ 选配送科室（默认带出本人科室，可改）与具体位置 → 提交成功。
 6. **我的订单**：「订单」tab 看到刚下的两单及状态。
-7. **管理端入口（无需绑员工）**：先在云函数 `adminLogin` 的环境变量里配置 `ADMIN_PWD`，然后新微信打开小程序 →「我的」→「管理后台」→ 输入该口令 → 今日概览/统计有数据；退出后重新进入需要再输口令（12 小时内免输）。
+7. **管理端入口（无需绑员工）**：先在云函数 `adminLogin` 的环境变量里配置 `ADMIN_PWD`，然后新微信打开小程序 →「我的」→「管理后台」→ 输入该口令 → 今日概览/统计有数据；进入后可在「修改密码」改成自己的强密码（改完所有设备需用新密码重登）；退出后重新进入需要再输口令（12 小时内免输）。
 8. **订单处理**：管理端「订单」→ 新单「接单」(→制作中) → 「制作完成」(→可取出/配送) → 「完成」；另试「取消」。
 9. **状态同步**：员工端「订单」下拉刷新，状态应跟随变化。
 10. **统计核对**：「营业统计」今日订单数/营业额/自取配送/热销菜品应合理。
@@ -404,4 +408,4 @@ await upload.remove(fileID);
 17. **时间显示**：员工端「订单」列表/详情、管理端「订单处理」列表/详情状态时间线，显示为设备本地时间（yyyy-MM-dd HH:mm），与下单/操作时刻一致（云函数返回的 ISO UTC 时间应正确转换为本地时间，不能直接显示 `2026-10-29T07:23:27.000Z`）。
 18. **订阅消息**：配置好模板 ID 后，先到「门店配置 → 通知自检」点「检查通知配置」确认三个模板均正常；再逐个点「测试·下单成功 / 可取餐 / 已送达」，允许订阅后手机应收到测试通知。正式流程：自取下单 → 收到下单成功 + 可取餐通知；配送订单管理端点「完成」→ 收到已送达通知（未授权则收不到，属正常）。
 
-> 管理口令配置在云函数 `adminLogin` 的环境变量 `ADMIN_PWD`（仓库和源码里不保存口令）。
+> 管理口令首次由云函数环境变量 `ADMIN_PWD` 初始化，之后可在管理后台「修改密码」修改（数据库存 scrypt 加盐哈希；仓库和源码里不保存口令）。

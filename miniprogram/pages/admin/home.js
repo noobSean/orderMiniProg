@@ -13,6 +13,7 @@ Page({
       { url: '/pages/admin/menu-manage', icon: '🍽️', name: '菜单管理' },
       { url: '/pages/admin/dept-manage', icon: '🏥', name: '科室管理' },
       { url: '/pages/admin/settings', icon: '⚙️', name: '门店配置' },
+      { url: '/pages/admin/password/password', icon: '🔒', name: '修改密码' },
       { url: '/pages/admin/stats', icon: '📊', name: '营业统计' }
     ]
   },
