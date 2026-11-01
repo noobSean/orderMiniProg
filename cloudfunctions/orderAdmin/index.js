@@ -319,6 +319,40 @@ async function sendDeliveryDoneNotice(order, clientIds) {
   })
 }
 
+// 惰性兜底：管理端打开/刷新订单列表时，顺便取消超时未付款订单（定时触发器未配置时也能工作）
+async function cancelExpiredUnpaidOrders() {
+  const timeoutMin = Math.max(1, Number(process.env.UNPAID_TIMEOUT_MIN) || 15)
+  const cutoff = new Date(Date.now() - timeoutMin * 60 * 1000)
+  const res = await db.collection('orders')
+    .where({ status: 'pending', paymentStatus: 'unpaid', createdAt: _.lt(cutoff) })
+    .limit(20)
+    .get()
+  const list = res.data || []
+  let cancelled = 0
+  for (const order of list) {
+    try {
+      const cur = await db.collection('orders').doc(order._id).get()
+      const o = cur && cur.data
+      if (!o || o.status !== 'pending' || o.paymentStatus !== 'unpaid') continue
+      const history = Array.isArray(o.statusHistory) ? o.statusHistory : []
+      history.push({ status: 'cancelled', time: db.serverDate(), note: '超时未付款，自动取消' })
+      await db.collection('orders').doc(order._id).update({
+        data: {
+          status: 'cancelled',
+          statusHistory: history,
+          cancelReason: 'unpaid_timeout',
+          updatedAt: db.serverDate()
+        }
+      })
+      await restoreStockForCancel(o)
+      cancelled += 1
+    } catch (e) {
+      console.log('[orderAdmin] auto cancel failed', (e && e.message) || '')
+    }
+  }
+  return cancelled
+}
+
 // 管理端鉴权：校验 adminLogin 签发的会话 token（admin_sessions 集合，12 小时有效）
 async function checkAdmin(event) {
   const token = (event && event.adminToken) ? String(event.adminToken) : ''
@@ -391,7 +425,10 @@ exports.main = async (event, context) => {
       let q = { createdAt: _.gte(since) }
       if (status && VALID_STATUS.indexOf(status) !== -1) q.status = status
       const res = await db.collection('orders').where(q).orderBy('createdAt', 'desc').limit(100).get()
-      return { ok: true, data: res.data || [] }
+      // 惰性兜底：列表查询成功后再清理超时未付款订单（失败不影响本次列表返回）
+      let autoCancelled = 0
+      try { autoCancelled = await cancelExpiredUnpaidOrders() } catch (e) {}
+      return { ok: true, data: res.data || [], autoCancelled: autoCancelled }
     }
     if (action === 'status') {
       const orderId = event.orderId
