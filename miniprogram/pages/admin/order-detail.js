@@ -71,6 +71,8 @@ Page({
     let amount = o.amount != null ? o.amount
       : (o.total != null ? o.total : (o.totalAmount != null ? o.totalAmount : null));
     if (amount == null) amount = items.reduce((s, i) => s + Number(i.lineTotal), 0);
+    const discountAmount = Number(o.discountAmount) || 0;
+    const originalTotal = (o.originalTotal != null) ? Number(o.originalTotal) : (Number(amount) + discountAmount);
     const st = normStatus(o.status);
     const history = (o.statusHistory || []).map(h => ({
       text: (h.text || h.label || STATUS[normStatus(h.status)] || h.status || ''),
@@ -96,6 +98,9 @@ Page({
       time: fmtTime(o.createTime || o.createdAt || o.time || o.createDate),
       items,
       totalText: money(amount),
+      discountAmount: discountAmount,
+      discountText: discountAmount > 0 ? money(discountAmount) : '',
+      originalTotalText: discountAmount > 0 ? money(originalTotal) : '',
       history
     };
   },

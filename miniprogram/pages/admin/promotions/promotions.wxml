@@ -1,0 +1,87 @@
+<!-- 管理后台：促销活动（proto） -->
+<view class="page form-page" wx:if="{{ready}}">
+  <!-- 新建/编辑 -->
+  <view class="card block">
+    <view class="between block-title">
+      <text>{{form._id ? '编辑活动' : '新建活动'}}</text>
+      <text wx:if="{{form._id}}" class="add-link" bindtap="onAdd">取消编辑</text>
+    </view>
+
+    <view class="form-row">
+      <text class="label">活动名称<text class="req">*</text></text>
+      <input class="input" placeholder="如：饮品 8 折" maxlength="20" value="{{form.name}}" data-key="name" bindinput="onField" />
+    </view>
+
+    <view class="form-row">
+      <text class="label">折扣<text class="req">*</text></text>
+      <input class="input" type="digit" placeholder="1-9.9，如 8.5 表示 8.5 折" value="{{form.discount}}" data-key="discount" bindinput="onField" />
+    </view>
+
+    <view class="form-row">
+      <text class="label">活动范围</text>
+      <radio-group class="scope-group" bindchange="onScope">
+        <label wx:for="{{scopeTypes}}" wx:key="value" class="scope-opt">
+          <radio value="{{item.value}}" checked="{{form.scopeType===item.value}}" color="#ff6b35" />{{item.label}}
+        </label>
+      </radio-group>
+    </view>
+
+    <view wx:if="{{form.scopeType==='category'}}" class="cat-box">
+      <checkbox-group bindchange="onCatChange">
+        <label wx:for="{{categories}}" wx:key="_id" class="cat-opt">
+          <checkbox value="{{item._id}}" checked="{{item.checked}}" color="#ff6b35" />{{item.name}}
+        </label>
+      </checkbox-group>
+      <view wx:if="{{!categories.length}}" class="muted empty-tip">暂无分类，请先在「菜单管理」创建分类</view>
+    </view>
+
+    <view class="form-row">
+      <text class="label">开始时间</text>
+      <picker mode="date" value="{{form.startDate}}" data-key="startDate" bindchange="onDate">
+        <view class="picker-view">{{form.startDate || '不限'}}</view>
+      </picker>
+      <picker wx:if="{{form.startDate}}" mode="time" value="{{form.startTime}}" data-key="startTime" bindchange="onTime">
+        <view class="picker-view">{{form.startTime}}</view>
+      </picker>
+    </view>
+
+    <view class="form-row">
+      <text class="label">结束时间</text>
+      <picker mode="date" value="{{form.endDate}}" data-key="endDate" bindchange="onDate">
+        <view class="picker-view">{{form.endDate || '不限'}}</view>
+      </picker>
+      <picker wx:if="{{form.endDate}}" mode="time" value="{{form.endTime}}" data-key="endTime" bindchange="onTime">
+        <view class="picker-view">{{form.endTime}}</view>
+      </picker>
+    </view>
+
+    <view class="form-row">
+      <text class="label">启用</text>
+      <switch checked="{{form.enabled}}" color="#ff6b35" bindchange="onEnabled" />
+    </view>
+
+    <view class="tip muted">同一菜品命中多个活动时，取折扣力度最大的一个（不叠加）；不填时间表示长期有效。</view>
+    <button class="btn-primary save-btn" loading="{{saving}}" disabled="{{saving}}" bindtap="onSubmit">{{saving ? '保存中…' : '保存活动'}}</button>
+  </view>
+
+  <!-- 活动列表 -->
+  <view class="card block">
+    <view class="block-title">活动列表</view>
+    <view wx:if="{{!list.length}}" class="muted empty-tip">暂无活动，先新建一个吧</view>
+    <view wx:for="{{list}}" wx:key="_id" class="promo-item">
+      <view class="between">
+        <view class="promo-name">{{item.name}}</view>
+        <view class="promo-state {{item.enabled ? 'on' : 'off'}}">{{item.stateText}}</view>
+      </view>
+      <view class="promo-meta muted">{{item.discountText}} · {{item.scopeText}}</view>
+      <view class="promo-meta muted">{{item.timeText}}</view>
+      <view class="promo-ops">
+        <text class="op" data-idx="{{index}}" bindtap="onEdit">编辑</text>
+        <text class="op" data-idx="{{index}}" bindtap="onToggle">{{item.enabled ? '停用' : '启用'}}</text>
+        <text class="op danger" data-idx="{{index}}" bindtap="onDelete">删除</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="safe-bottom" />
+</view>

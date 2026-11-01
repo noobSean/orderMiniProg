@@ -25,7 +25,14 @@
           <view wx:if="{{item.stock!=null}}" class="muted stock">库存 {{item.stock}}{{item.unit||'份'}}</view>
           <view wx:if="{{(item.specs&&item.specs.length)||(item.extras&&item.extras.length)}}" class="spec-tag">选规格/加料</view>
           <view class="between foot">
-            <view class="price">¥{{item.price}}</view>
+            <view class="price">
+              <block wx:if="{{item.hasPromo}}">
+                <text>¥{{item.salePrice}}</text>
+                <text class="orig-price">¥{{item.price}}</text>
+                <text class="promo-tag">{{item.promoTag}}</text>
+              </block>
+              <block wx:else>¥{{item.price}}</block>
+            </view>
             <view class="stepper">
               <view wx:if="{{qtyMap[item._id]}}" class="step-btn" data-id="{{item._id}}" catchtap="onDec">−</view>
               <text wx:if="{{qtyMap[item._id]}}" class="qty">{{qtyMap[item._id]}}</text>
@@ -53,7 +60,14 @@
   <view wx:if="{{showPopup}}" class="popup">
     <view class="between pop-head">
       <view class="popup-name">{{curDish.name}}</view>
-      <view class="popup-price price">¥{{popupPrice}}</view>
+      <view class="popup-price price">
+        <block wx:if="{{popupHasPromo}}">
+          <text>¥{{popupSalePrice}}</text>
+          <text class="orig-price">¥{{popupPrice}}</text>
+          <text class="promo-tag">{{popupPromoTag}}</text>
+        </block>
+        <block wx:else>¥{{popupPrice}}</block>
+      </view>
     </view>
 
     <view wx:if="{{curDish.specs&&curDish.specs.length}}" class="pop-sec">

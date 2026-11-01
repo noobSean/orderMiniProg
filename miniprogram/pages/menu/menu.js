@@ -1,5 +1,6 @@
 const api = require('../../utils/api');
 const store = require('../../utils/store');
+const promo = require('../../utils/promo');
 
 // 原生 tabBar 显隐（低版本基础库用 fail 兜底，不影响交互）
 function hideTabBar() {
@@ -21,6 +22,7 @@ Page({
     catDishes: [],
     cartQty: 0,
     cartAmount: '0.00',
+    promotions: [],
     qtyMap: {},
     // 规格/加料弹层
     showPopup: false,
@@ -29,6 +31,9 @@ Page({
     selExtras: [],
     extraSel: [],        // 加料选中标记（与 extras 一一对应，供 WXML 直接判断，避免在 WXML 里调用 indexOf）
     popupPrice: '0.00',
+    popupHasPromo: false,
+    popupSalePrice: '0.00',
+    popupPromoTag: '',
     popupQty: 1
   },
 
@@ -48,18 +53,52 @@ Page({
   loadData() {
     const st = wx.getStorageSync('dsh_settings');
     if (st) this.applySettings(st);
+    const promosCached = wx.getStorageSync('dsh_promotions');
+    if (promosCached && promosCached.length) this.setPromotions(promosCached);
     const m = wx.getStorageSync('dsh_menu');
-    if (m) { this.setData({ categories: m.categories || [], dishes: m.dishes || [] }); this.filterDishes(); }
+    if (m) { this.setData({ categories: m.categories || [], dishes: this.decorateDishes(m.dishes || []) }); this.filterDishes(); }
     Promise.all([
       api.getSettings().catch(() => null),
-      api.getMenu().catch(() => null)
-    ]).then(([s, menu]) => {
+      api.getMenu().catch(() => null),
+      api.getPromotions().catch(() => null)
+    ]).then(([s, menu, promos]) => {
       if (s) { wx.setStorageSync('dsh_settings', s); this.applySettings(s); }
+      if (promos) {
+        wx.setStorageSync('dsh_promotions', promos);
+        this.setPromotions(promos);
+      }
       if (menu) {
         wx.setStorageSync('dsh_menu', menu);
-        this.setData({ categories: menu.categories || [], dishes: menu.dishes || [] });
+        this.setData({ categories: menu.categories || [], dishes: this.decorateDishes(menu.dishes || []) });
         this.filterDishes();
       }
+      this.refreshCart();
+    });
+  },
+
+  // 保存并筛选生效中的活动；重新装饰菜品价格
+  setPromotions(list) {
+    const active = promo.activePromotions(list || []);
+    this.setData({ promotions: active });
+    this.setData({ dishes: this.decorateDishes(this.data.dishes) });
+    this.filterDishes();
+  },
+
+  // 给菜品加上促销展示字段（不改变原始价格，计算仍由服务端为准）
+  decorateDishes(dishes) {
+    const promos = this.data.promotions || [];
+    return (dishes || []).map(d => {
+      const p = promo.bestPromotion(promos, d);
+      if (!p) return Object.assign({}, d, { hasPromo: false });
+      const rate = Number(p.rate) || 1;
+      const sale = promo.round2((Number(d.price) || 0) * rate);
+      const zhe = Math.round(rate * 100) / 10;
+      return Object.assign({}, d, {
+        hasPromo: true,
+        salePrice: sale.toFixed(2),
+        promoTag: (Number.isInteger(zhe) ? zhe : zhe.toFixed(1)) + '折',
+        promotionName: p.name || ''
+      });
     });
   },
 
@@ -83,7 +122,12 @@ Page({
     const cart = store.loadCart();
     const qtyMap = {};
     cart.forEach(i => { qtyMap[i.dishId] = (qtyMap[i.dishId] || 0) + i.qty; });
-    this.setData({ cart, cartQty: store.totalQty(cart), cartAmount: store.totalAmount(cart).toFixed(2), qtyMap });
+    let amount = store.totalAmount(cart);
+    try {
+      const calc = promo.applyToItems(cart, this.data.promotions);
+      amount = calc.total;
+    } catch (e) {}
+    this.setData({ cart, cartQty: store.totalQty(cart), cartAmount: amount.toFixed(2), qtyMap });
   },
 
   onCatTap(e) {
@@ -99,7 +143,7 @@ Page({
     if ((dish.specs && dish.specs.length) || (dish.extras && dish.extras.length)) {
       this.openSpec(dish);
     } else {
-      store.add({ dishId: dish._id, name: dish.name, price: dish.price, spec: '', extras: [] });
+      store.add({ dishId: dish._id, categoryId: dish.categoryId, name: dish.name, price: dish.price, spec: '', extras: [] });
       this.refreshCart();
     }
   },
@@ -159,7 +203,15 @@ Page({
     let p = d.price;
     if (this.data.selSpecIdx >= 0 && d.specs && d.specs[this.data.selSpecIdx]) p += d.specs[this.data.selSpecIdx].price;
     (this.data.selExtras || []).forEach(i => { if (d.extras && d.extras[i]) p += d.extras[i].price; });
-    this.setData({ popupPrice: p.toFixed(2) });
+    const matched = promo.bestPromotion(this.data.promotions, d);
+    const rate = matched ? Number(matched.rate) : 1;
+    const zhe = Math.round(rate * 100) / 10;
+    this.setData({
+      popupPrice: p.toFixed(2),
+      popupHasPromo: !!matched,
+      popupSalePrice: promo.round2(p * rate).toFixed(2),
+      popupPromoTag: matched ? ((Number.isInteger(zhe) ? zhe : zhe.toFixed(1)) + '折') : ''
+    });
   },
   confirmAdd() {
     const d = this.data.curDish;
@@ -168,7 +220,7 @@ Page({
     const extras = this.data.selExtras.map(i => (d.extras && d.extras[i]) ? d.extras[i].name : '').filter(Boolean);
     const price = Number(this.data.popupPrice) || 0;
     const qty = Math.max(1, this.data.popupQty || 1);
-    const item = { dishId: d._id, name: d.name, price, spec, extras };
+    const item = { dishId: d._id, categoryId: d.categoryId, name: d.name, price, spec, extras };
     for (let i = 0; i < qty; i++) store.add(item);
     this.setData({ showPopup: false, curDish: null });
     showTabBar();

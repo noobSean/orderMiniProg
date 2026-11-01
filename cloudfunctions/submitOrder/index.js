@@ -273,6 +273,44 @@ async function sendOrderPlacedNotice(order, event) {
   })
 }
 
+// ==================== 促销/折扣（proto） ====================
+// 规则：同一菜品命中多个活动时取折扣力度最大的一个（不叠加）；折扣按分四舍五入。
+function round2(n) { return Math.round((Number(n) || 0) * 100) / 100 }
+function promoActive(promo, now) {
+  if (!promo || promo.enabled === false) return false
+  const rate = Number(promo.rate)
+  if (!(rate > 0 && rate < 1)) return false
+  const s = promo.startAt === undefined || promo.startAt === null || promo.startAt === '' ? null : Number(promo.startAt)
+  const e = promo.endAt === undefined || promo.endAt === null || promo.endAt === '' ? null : Number(promo.endAt)
+  if (s !== null && isFinite(s) && now < s) return false
+  if (e !== null && isFinite(e) && now > e) return false
+  return true
+}
+function promoMatches(promo, dish) {
+  if (!promo || !dish) return false
+  const type = promo.scopeType || 'all'
+  if (type === 'all') return true
+  if (type === 'category') {
+    const ids = Array.isArray(promo.categoryIds) ? promo.categoryIds : []
+    return ids.map(String).indexOf(String(dish.categoryId)) >= 0
+  }
+  if (type === 'dish') {
+    const ids = Array.isArray(promo.dishIds) ? promo.dishIds : []
+    return ids.map(String).indexOf(String(dish._id)) >= 0
+  }
+  return false
+}
+function bestPromo(promos, dish) {
+  let best = null
+  ;(promos || []).forEach(function (p) {
+    if (!promoMatches(p, dish)) return
+    const rate = Number(p.rate)
+    if (!(rate > 0 && rate < 1)) return
+    if (!best || rate < Number(best.rate)) best = p
+  })
+  return best
+}
+
 // 事务：校验并扣库存、生成订单
 exports.main = async (event, context) => {
   // 自测：云函数测试时传 {"action":"ping"}，能返回即说明函数部署/启动正常
@@ -295,10 +333,21 @@ exports.main = async (event, context) => {
     }
     const buyer = empRes.data[0]
 
+    // 读取生效中的促销活动（集合不存在/查询失败按无活动处理，不影响下单）
+    let promotions = []
+    try {
+      const pr = await db.collection('promotions').where({ enabled: true }).limit(50).get()
+      promotions = (pr.data || []).filter(function (p) { return promoActive(p, Date.now()) })
+    } catch (e) {
+      promotions = []
+    }
+
     const transaction = await db.startTransaction()
     try {
       const orderItems = []
       let total = 0
+      let originalTotal = 0
+      const discountMap = {}
 
       for (const it of items) {
         if (!it || !it.dishId) throw new Error('菜品缺少 dishId')
@@ -343,15 +392,35 @@ exports.main = async (event, context) => {
             .update({ data: { stock: stock - qty } })
         }
 
-        orderItems.push({
+        // 促销：命中活动则按最优折扣率计算（不叠加）
+        const originalLine = round2(unitPrice * qty)
+        const promo = bestPromo(promotions, dish)
+        const rate = promo ? Number(promo.rate) : 1
+        const payLine = round2(originalLine * rate)
+        const lineDiscount = round2(originalLine - payLine)
+        originalTotal = round2(originalTotal + originalLine)
+        total = round2(total + payLine)
+
+        const orderItem = {
           dishId: dish._id,
           name: dish.name,
-          price: Math.round(unitPrice * 100) / 100,
+          price: round2(unitPrice),
           spec: spec,
           extras: extrasFinal,
           qty: qty
-        })
-        total += unitPrice * qty
+        }
+        if (promo && lineDiscount > 0) {
+          orderItem.originalPrice = round2(unitPrice)
+          orderItem.discountRate = rate
+          orderItem.discountAmount = lineDiscount
+          orderItem.lineTotal = payLine
+          orderItem.promotionId = promo._id || ''
+          orderItem.promotionName = promo.name || ''
+          const key = promo._id || promo.name || 'promo'
+          if (!discountMap[key]) discountMap[key] = { promotionId: promo._id || '', name: promo.name || '促销活动', rate: rate, amount: 0 }
+          discountMap[key].amount = round2(discountMap[key].amount + lineDiscount)
+        }
+        orderItems.push(orderItem)
       }
 
       const now = new Date()
@@ -380,7 +449,7 @@ exports.main = async (event, context) => {
           location: buyer.location || ''
         },
         items: orderItems,
-        total: Math.round(total * 100) / 100,
+        total: round2(total),
         delivery: {
           target: deliveryTarget,
           note: note || (delivery.note ? String(delivery.note) : '')
@@ -389,6 +458,12 @@ exports.main = async (event, context) => {
         statusHistory: [{ status: 'pending', time: db.serverDate(), note: '已下单' }],
         createdAt: db.serverDate(),
         updatedAt: db.serverDate()
+      }
+      const discountAmount = round2(originalTotal - total)
+      if (discountAmount > 0) {
+        orderDoc.originalTotal = round2(originalTotal)
+        orderDoc.discountAmount = discountAmount
+        orderDoc.discounts = Object.keys(discountMap).map(function (k) { return discountMap[k] })
       }
 
       const addRes = await transaction.collection('orders').add({ data: orderDoc })
@@ -402,12 +477,16 @@ exports.main = async (event, context) => {
       }
       return {
         ok: true,
-        data: {
+        data: Object.assign({
           orderId: addRes._id,
           orderNo: orderNo,
           pickupNo: pickupNo,
           total: orderDoc.total
-        }
+        }, orderDoc.discountAmount ? {
+          originalTotal: orderDoc.originalTotal,
+          discountAmount: orderDoc.discountAmount,
+          discounts: orderDoc.discounts
+        } : {})
       }
     } catch (err) {
       await transaction.rollback().catch(function () {})

@@ -85,6 +85,25 @@ async function getSettings() {
   };
 }
 
+/* ---------------- 促销 ---------------- */
+
+// 生效中/未开始的促销活动（客户端直读，安全规则允许 read；具体计算以云函数下单结果为准）
+async function getPromotions() {
+  const d = db();
+  const res = await d.collection('promotions').where({ enabled: true }).get();
+  return (res.data || []).map(x => ({
+    _id: x._id,
+    name: x.name,
+    scopeType: x.scopeType,
+    categoryIds: x.categoryIds || [],
+    dishIds: x.dishIds || [],
+    rate: Number(x.rate),
+    startAt: x.startAt,
+    endAt: x.endAt,
+    enabled: x.enabled !== false
+  }));
+}
+
 /* ---------------- 身份 ---------------- */
 
 // 静默登录：返回 openid 与已绑定档案（未绑定则 profile 为 null）
@@ -159,6 +178,9 @@ function settingsAdmin(action, payload) { return call('settingsAdmin', Object.as
 // 统计 adminStats({mode:'today'|'range', from, to})
 function adminStats(payload) { return call('adminStats', payload || {}); }
 
+// 促销活动管理：action 'list'|'save'|'toggle'|'remove'
+function promoAdmin(action, payload) { return call('promoAdmin', Object.assign({ action: action }, payload || {})); }
+
 // 订阅消息自检：检查模板 ID/关键字/字段映射，可选发送测试通知给当前微信
 function subscribeCheck(payload) { return call('subscribeCheck', payload || {}); }
 
@@ -181,6 +203,8 @@ module.exports = {
   categoryAdmin,
   settingsAdmin,
   adminStats,
+  promoAdmin,
+  getPromotions,
   subscribeCheck,
   getDepartments,
   deptAdmin

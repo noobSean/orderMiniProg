@@ -69,3 +69,12 @@
 .total { flex: 1; min-width: 0; font-size: 28rpx; }
 .total .price { font-size: 36rpx; }
 .submit-btn { flex-shrink: 0; padding: 20rpx 60rpx; white-space: nowrap; }
+
+/* 促销 */
+.orig-price { text-decoration: line-through; color: var(--text-weak); margin-right: 8rpx; }
+.promo-line { font-size: 23rpx; color: var(--danger); margin-top: 4rpx; }
+.footer-left { flex: 1; min-width: 0; }
+.footer-left .total { font-size: 27rpx; }
+.fee-lines { margin-bottom: 4rpx; }
+.fee-row { font-size: 23rpx; line-height: 1.6; }
+.fee-row .price { font-size: 23rpx; }

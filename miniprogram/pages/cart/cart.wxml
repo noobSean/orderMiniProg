@@ -8,7 +8,14 @@
     <view class="item-main">
       <view class="item-name">{{item.name}}<text wx:if="{{item.spec}}" class="sub">{{item.spec}}</text></view>
       <view wx:if="{{item.extras.length}}" class="sub">加料：{{item.extras}}</view>
-      <view class="muted unit">¥{{item.price}} × {{item.qty}}</view>
+      <view class="muted unit">
+        <block wx:if="{{item.hasDiscount}}">
+          <text class="orig-price">¥{{item.originalLine}}</text>
+          实付 ¥{{item.lineTotal}}
+        </block>
+        <block wx:else>¥{{item.price}} × {{item.qty}}</block>
+      </view>
+      <view wx:if="{{item.hasDiscount}}" class="promo-line muted">已优惠 -¥{{item.discountAmount}}（{{item.promotionName}} {{item.discountRate*10}}折）</view>
     </view>
     <view class="item-right">
       <view class="stepper">
@@ -40,7 +47,13 @@
   </view>
 
   <view wx:if="{{list.length}}" class="footer">
-    <view class="total">合计 <text class="price">¥{{totalAmount}}</text></view>
+    <view class="footer-left">
+      <view wx:if="{{discountAmount>0}}" class="fee-lines">
+        <view class="between fee-row"><text class="muted">活动优惠</text><text class="price">-¥{{discountAmount}}</text></view>
+        <view class="between fee-row muted"><text>原价</text><text>¥{{originalTotal}}</text></view>
+      </view>
+      <view class="total">合计 <text class="price">¥{{totalAmount}}</text></view>
+    </view>
     <button class="btn-primary submit-btn" bindtap="submit" loading="{{submitting}}" disabled="{{submitting}}">提交订单</button>
   </view>
 </view>

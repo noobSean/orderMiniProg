@@ -36,6 +36,14 @@
         <view class="i-sub muted" wx:if="{{item.extras.length}}">加料：<text wx:for="{{item.extras}}" wx:for-item="ex" wx:key="name">{{ex.name}}</text></view>
         <view class="i-sub muted">x{{item.qty}} · 单价 ¥{{item.price}}</view>
       </view>
+      <view wx:if="{{detail.discountText}}" class="between total-row">
+        <text class="muted">活动优惠</text>
+        <text class="price">-¥{{detail.discountText}}</text>
+      </view>
+      <view wx:if="{{detail.originalTotalText}}" class="between total-row muted">
+        <text>原价</text>
+        <text>¥{{detail.originalTotalText}}</text>
+      </view>
       <view class="between total-row">
         <text class="muted">合计</text>
         <text class="price total">¥{{detail.totalText}}</text>

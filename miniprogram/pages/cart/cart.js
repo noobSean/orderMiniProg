@@ -1,12 +1,16 @@
 const api = require('../../utils/api');
 const store = require('../../utils/store');
 const subscribe = require('../../utils/subscribe');
+const promo = require('../../utils/promo');
 
 Page({
   data: {
     list: [],
     totalQty: 0,
     totalAmount: '0.00',
+    discountAmount: '0.00',
+    originalTotal: '0.00',
+    promotions: [],
     settings: { allowSelfPickup: true, allowDelivery: true, locations: [] },
     takeWay: 'pickup',
     deptName: '',
@@ -19,6 +23,13 @@ Page({
   onShow() {
     const s = wx.getStorageSync('dsh_settings');
     if (s) this.setData({ settings: s });
+    const cachedPromos = wx.getStorageSync('dsh_promotions');
+    if (cachedPromos && cachedPromos.length) this.setData({ promotions: promo.activePromotions(cachedPromos) });
+    api.getPromotions().then(list => {
+      wx.setStorageSync('dsh_promotions', list);
+      this.setData({ promotions: promo.activePromotions(list) });
+      this.refresh();
+    }).catch(() => {});
     api.getSettings().then(s => { wx.setStorageSync('dsh_settings', s); this.setData({ settings: s }); }).catch(() => {});
     const p = getApp().getCachedProfile();
     if (p && p.dept && !this.data.deptName) this.setData({ deptName: p.dept });
@@ -26,8 +37,20 @@ Page({
   },
 
   refresh() {
-    const list = store.loadCart();
-    this.setData({ list, totalQty: store.totalQty(list), totalAmount: store.totalAmount(list).toFixed(2) });
+    const raw = store.loadCart();
+    const calc = promo.applyToItems(raw, this.data.promotions);
+    this.setData({
+      list: calc.items,
+      totalQty: store.totalQty(raw),
+      totalAmount: calc.total.toFixed(2),
+      discountAmount: calc.discountAmount.toFixed(2),
+      originalTotal: calc.originalTotal.toFixed(2)
+    });
+  },
+
+  // 购物车操作只回传必要字段，避免把展示字段写回缓存
+  baseItem(o) {
+    return { dishId: o.dishId, categoryId: o.categoryId, name: o.name, price: o.price, spec: o.spec || '', extras: o.extras || [] };
   },
 
   onTakeWay(e) { this.setData({ takeWay: e.currentTarget.dataset.v }); },
@@ -44,9 +67,9 @@ Page({
   onLoc(e) { this.setData({ location: e.detail.value }); },
   onNote(e) { this.setData({ note: e.detail.value }); },
 
-  inc(e) { const o = this.data.list[e.currentTarget.dataset.idx]; if (o) { store.add(o); this.refresh(); } },
-  dec(e) { const o = this.data.list[e.currentTarget.dataset.idx]; if (o) { store.remove(o); this.refresh(); } },
-  del(e) { const o = this.data.list[e.currentTarget.dataset.idx]; if (o) { store.setItemQty(o, 0); this.refresh(); } },
+  inc(e) { const o = this.data.list[e.currentTarget.dataset.idx]; if (o) { store.add(this.baseItem(o)); this.refresh(); } },
+  dec(e) { const o = this.data.list[e.currentTarget.dataset.idx]; if (o) { store.remove(this.baseItem(o)); this.refresh(); } },
+  del(e) { const o = this.data.list[e.currentTarget.dataset.idx]; if (o) { store.setItemQty(this.baseItem(o), 0); this.refresh(); } },
   goMenu() { wx.switchTab({ url: '/pages/menu/menu' }); },
 
   async submit() {
@@ -87,7 +110,7 @@ Page({
     const payload = {
       type: takeWay,
       items: this.data.list.map(i => ({
-        dishId: i.dishId, name: i.name, price: i.price, spec: i.spec || '', extras: i.extras || [], qty: i.qty
+        dishId: i.dishId, categoryId: i.categoryId, name: i.name, price: i.price, spec: i.spec || '', extras: i.extras || [], qty: i.qty
       })),
       delivery: {
         type: takeWay,

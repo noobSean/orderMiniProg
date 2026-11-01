@@ -17,7 +17,8 @@
     "pages/admin/stats",
     "pages/admin/login",
     "pages/admin/employees",
-    "pages/admin/password/password"
+    "pages/admin/password/password",
+    "pages/admin/promotions/promotions"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",

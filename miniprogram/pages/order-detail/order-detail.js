@@ -16,6 +16,8 @@ Page({
     deliveryTarget: '',
     items: [],
     note: '',
+    originalTotal: '',
+    discountAmount: '',
     createdAt: '',
     canNotify: false   // 当前订单类型是否配置了对应的订阅消息模板
   },
@@ -42,6 +44,8 @@ Page({
       const total = (o.total != null) ? o.total : this.data.total;
       const raw = o.createdAt || o.time || o.createTime || o.orderTime;
       const notifyTemplates = config.subscribeTemplates || {};
+      const discountAmount = Number(o.discountAmount) || 0;
+      const originalTotal = (o.originalTotal != null) ? Number(o.originalTotal) : (Number(total) + discountAmount);
       this.setData({
         order: o,
         canNotify: !!(isDelivery ? notifyTemplates.deliveryDone : notifyTemplates.pickupReady),
@@ -54,6 +58,8 @@ Page({
         deliveryTarget: (o.delivery && o.delivery.target) || '',
         items,
         note: o.note || (o.delivery && o.delivery.note) || '',
+        discountAmount: discountAmount > 0 ? discountAmount.toFixed(2) : '',
+        originalTotal: discountAmount > 0 ? originalTotal.toFixed(2) : '',
         createdAt: util.formatTimeValue(raw) || (raw ? String(raw) : '')
       });
     }).catch(err => {

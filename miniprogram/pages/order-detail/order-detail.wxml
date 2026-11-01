@@ -29,6 +29,12 @@
         <text class="price">¥{{item.price}}</text>
       </view>
     </view>
+    <view wx:if="{{discountAmount}}" class="between total-row">
+      <text class="muted">活动优惠</text><text class="price">-¥{{discountAmount}}</text>
+    </view>
+    <view wx:if="{{originalTotal}}" class="between total-row muted">
+      <text>原价</text><text>¥{{originalTotal}}</text>
+    </view>
     <view class="between total-row">
       <text>合计</text><text class="price big">¥{{total}}</text>
     </view>

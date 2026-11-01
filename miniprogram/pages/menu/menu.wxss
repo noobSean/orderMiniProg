@@ -66,3 +66,22 @@
 .pill { max-width: 100%; font-size: 26rpx; border: 2rpx solid var(--line); border-radius: 999rpx; padding: 10rpx 26rpx; margin: 0 16rpx 16rpx 0; color: var(--text); word-break: break-all; }
 .pill.picked { border-color: var(--primary); color: var(--primary); background: var(--primary-weak); }
 .confirm-btn { margin-top: 30rpx; }
+
+/* 促销价 */
+.orig-price {
+  font-size: 22rpx;
+  color: var(--text-weak);
+  text-decoration: line-through;
+  margin-left: 10rpx;
+  font-weight: 400;
+}
+.promo-tag {
+  display: inline-block;
+  font-size: 20rpx;
+  color: #fff;
+  background: var(--danger);
+  border-radius: 6rpx;
+  padding: 0 8rpx;
+  margin-left: 10rpx;
+  vertical-align: middle;
+}

@@ -28,7 +28,8 @@ order_recipe_miniprog/
 │  ├─ categoryAdmin/
 │  ├─ settingsAdmin/
 │  ├─ adminStats/
-│  └─ subscribeCheck/          # 订阅消息自检（模板/权限/字段映射/测试发送）
+│  ├─ subscribeCheck/          # 订阅消息自检（模板/权限/字段映射/测试发送）
+│  └─ promoAdmin/              # 促销活动管理（全部/分类/菜品折扣，proto）
 ├─ database/                    # 数据模型说明、示例 seed、安全规则建议
 │  ├─ README.md
 │  └─ rules.json
@@ -82,8 +83,8 @@ order_recipe_miniprog/
 
 ## 三、创建集合与初始数据
 
-按 `database/README.md` 的说明，在云开发控制台「数据库」创建 8 个集合：
-`settings`、`menu_categories`、`dishes`、`departments`、`employees`、`orders`、`admin_sessions`、`admin_config`。
+按 `database/README.md` 的说明，在云开发控制台「数据库」创建 9 个集合：
+`settings`、`menu_categories`、`dishes`、`departments`、`employees`、`orders`、`admin_sessions`、`admin_config`、`promotions`。
 
 > `admin_sessions` 保存管理端登录会话，`admin_config` 保存管理密码哈希（`adminLogin` 首次登录/首次改密时会尝试自动创建；若云环境不允许云函数建集合，请手动新建，权限均设为「仅云函数可读写」）。
 
@@ -338,8 +339,8 @@ await upload.remove(fileID);
 
 ## 十一、测试与质量
 
-- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，345 个用例）
-  - 云函数：`npm run test:cloud`（内存 mock 微信云 SDK，覆盖 15 个云函数）
+- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，366 个用例）
+  - 云函数：`npm run test:cloud`（内存 mock 微信云 SDK，覆盖 16 个云函数）
   - 小程序端工具：`npm run test:client`
   - 静态/安全/体积/兼容：`npm run test:static`
 - **测试报告**：[docs/TEST_REPORT.md](docs/TEST_REPORT.md)
@@ -410,5 +411,37 @@ await upload.remove(fileID);
 16. **登录状态恢复**：清除小程序缓存（开发者工具「清缓存」或手机端删除小程序重进）→ 进入「我的」应自动恢复为已绑定资料，无需重新填工号；点「退出登录」→ 显示「重新登录」→ 点登录恢复；管理员在「员工绑定」解绑后，员工端刷新「我的」应回到「尚未绑定」。
 17. **时间显示**：员工端「订单」列表/详情、管理端「订单处理」列表/详情状态时间线，显示为设备本地时间（yyyy-MM-dd HH:mm），与下单/操作时刻一致（云函数返回的 ISO UTC 时间应正确转换为本地时间，不能直接显示 `2026-10-29T07:23:27.000Z`）。
 18. **订阅消息**：配置好模板 ID 后，先到「门店配置 → 通知自检」点「检查通知配置」确认三个模板均正常；再逐个点「测试·下单成功 / 可取餐 / 已送达」，允许订阅后手机应收到测试通知。正式流程：自取下单 → 收到下单成功 + 可取餐通知；配送订单管理端点「完成」→ 收到已送达通知（未授权则收不到，属正常）。
+19. **促销活动（proto）**：管理端「促销活动」新建「全场 8 折」或「饮品 5 折」（可按分类）→ 员工端点餐页应显示折后价/活动标签；加购后购物车显示原价、活动优惠、实付；下单后员工端/管理端订单详情显示原价/优惠/合计，管理端营业额按实付统计。
+20. **修改管理密码**：管理端「修改密码」输入原密码 + 新密码 → 成功后所有设备需重新登录；旧密码登录失败、新密码登录成功。
 
 > 管理口令首次由云函数环境变量 `ADMIN_PWD` 初始化，之后可在管理后台「修改密码」修改（数据库存 scrypt 加盐哈希；仓库和源码里不保存口令）。
+
+### 促销 / 折扣（proto）
+
+当前实现的是「折扣活动」最小闭环，数据集合 `promotions`，管理后台「促销活动」维护：
+
+| 字段 | 说明 |
+| --- | --- |
+| `name` | 活动名称（≤20 字） |
+| `scopeType` | `all` 全部品类 / `category` 指定分类 / `dish` 指定菜品 |
+| `categoryIds` / `dishIds` | 指定范围时的分类/菜品 `_id` 列表 |
+| `discount` / `rate` | 折扣（如 8.5 表示 8.5 折）/ 折扣率（0.85） |
+| `startAt` / `endAt` | 活动起止时间（毫秒时间戳，可空 = 不限） |
+| `enabled` | 是否启用 |
+
+**规则（proto 版，简单可预期）**：
+
+- 同一菜品同时命中多个活动时，只取**折扣力度最大**的一个，**不叠加**；
+- 折扣作用于「菜品单价（含规格/加料）× 数量」，金额按分四舍五入；
+- 服务端 `submitOrder` 会**重新计算**并快照落库：订单记录 `originalTotal`、`discountAmount`、`discounts`，明细记录 `originalPrice`、`discountRate`、`discountAmount`、`lineTotal`、`promotionName`；
+- 客户端菜单/购物车展示的活动价与优惠仅为**预估**（同一套规则），最终金额以服务端下单结果为准；
+- 已下单订单的优惠是快照，之后修改/停用活动不影响历史订单。
+
+**部署/配置**：
+
+1. 新建云函数 `promoAdmin`（右键「上传并部署：云端安装依赖」）；
+2. 云数据库新建集合 `promotions`：权限「所有用户可读，仅云函数可写」（员工端菜单/购物车需要读活动；写入只走管理端云函数）；
+3. 重新部署 `submitOrder`（折扣计算在服务端）；
+4. 重新编译小程序（菜单/购物车展示、管理端促销页面）。
+
+**后续可扩展**（proto 稳定后按需求迭代）：满减/满赠、第二份半价、优惠券/兑换码、会员价、活动叠加/互斥规则、限购、活动统计、按人群/时段、活动审批与定时预热等。
