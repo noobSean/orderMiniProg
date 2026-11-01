@@ -1,0 +1,82 @@
+<view class="page form-page" wx:if="{{ready}}">
+  <!-- 基本 -->
+  <view class="card block">
+    <view class="block-title">基本设置</view>
+    <view class="form-row">
+      <text class="label">门店名称<text class="req">*</text></text>
+      <input class="input" placeholder="企业餐厅" value="{{form.storeName}}" data-key="storeName" bindinput="onField" />
+    </view>
+    <view class="form-row">
+      <text class="label">营业时间</text>
+      <view class="time-wrap">
+        <picker mode="time" value="{{form.openTime}}" data-key="openTime" bindchange="onTime">
+          <view class="picker-view">开 {{form.openTime}}</view>
+        </picker>
+        <text class="time-sep">~</text>
+        <picker mode="time" value="{{form.closeTime}}" data-key="closeTime" bindchange="onTime">
+          <view class="picker-view">止 {{form.closeTime}}</view>
+        </picker>
+      </view>
+    </view>
+    <view class="form-row">
+      <text class="label">联系电话</text>
+      <input class="input" type="number" placeholder="联系电话" value="{{form.phone}}" data-key="phone" bindinput="onField" />
+    </view>
+    <view class="form-row">
+      <text class="label">公告</text>
+      <input class="input" placeholder="店铺公告" value="{{form.notice}}" data-key="notice" bindinput="onField" />
+    </view>
+  </view>
+
+  <!-- 配送方式 -->
+  <view class="card block">
+    <view class="block-title">营业方式</view>
+    <view class="form-row">
+      <text class="label">支持自取</text>
+      <switch checked="{{form.allowSelfPickup}}" color="#ff6b35" data-key="allowSelfPickup" bindchange="onSwitch" />
+    </view>
+    <view class="form-row">
+      <text class="label">支持配送</text>
+      <switch checked="{{form.allowDelivery}}" color="#ff6b35" data-key="allowDelivery" bindchange="onSwitch" />
+    </view>
+  </view>
+
+  <!-- 科室（独立管理） -->
+  <view class="card block">
+    <view class="block-title between">
+      <text>科室管理</text>
+      <text class="add-link" bindtap="goDeptManage">管理 ›</text>
+    </view>
+    <view class="kv-empty muted">科室已改为独立管理，支持搜索、新增、启用/停用。点右上角「管理」进入。</view>
+  </view>
+
+  <!-- 配送位置 -->
+  <view class="card block">
+    <view class="block-title between">
+      <text>配送位置</text>
+      <text class="add-link" bindtap="addLoc">＋ 添加</text>
+    </view>
+    <view class="kv-line" wx:for="{{form.locations}}" wx:key="index">
+      <input class="kv-input" placeholder="配送目标（如：A栋-3楼）" value="{{item}}" data-index="{{index}}" bindinput="onLoc" />
+      <text class="del" data-index="{{index}}" bindtap="delLoc">×</text>
+    </view>
+    <view wx:if="{{!form.locations.length}}" class="kv-empty muted">暂无配送位置</view>
+  </view>
+
+  <!-- 订阅消息自检 -->
+  <view class="card block">
+    <view class="block-title">通知自检</view>
+    <view class="kv-empty muted">检查订阅消息模板 ID/账号内是否存在/字段映射；也可给当前微信发一条测试通知（需要先在弹窗点允许）。</view>
+    <view class="notify-actions">
+      <button class="notify-btn" bindtap="onNotifyCheck">检查通知配置</button>
+      <button class="notify-btn" data-kind="orderPlaced" bindtap="onNotifyTest">测试·下单成功</button>
+      <button class="notify-btn" data-kind="pickupReady" bindtap="onNotifyTest">测试·可取餐</button>
+      <button class="notify-btn" data-kind="deliveryDone" bindtap="onNotifyTest">测试·已送达</button>
+    </view>
+  </view>
+
+  <view class="safe-bottom" />
+  <view class="save-bar">
+    <button class="btn-primary save-btn" loading="{{saving}}" disabled="{{saving}}" bindtap="onSave">保存</button>
+  </view>
+</view>

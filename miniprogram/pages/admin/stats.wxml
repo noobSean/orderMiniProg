@@ -1,0 +1,69 @@
+<view class="page stats-page" wx:if="{{ready}}">
+  <!-- 模式切换 -->
+  <view class="mode-bar">
+    <view class="mode {{mode==='today'?'active':''}}" data-mode="today" bindtap="onMode">今日</view>
+    <view class="mode {{mode==='range'?'active':''}}" data-mode="range" bindtap="onMode">自定义</view>
+  </view>
+
+  <!-- 自定义区间 -->
+  <view wx:if="{{mode==='range'}}" class="card range-row">
+    <picker mode="date" value="{{from}}" bindchange="onFrom">
+      <view class="date-view">{{from || '开始日期'}}</view>
+    </picker>
+    <text class="sep">~</text>
+    <picker mode="date" value="{{to}}" bindchange="onTo">
+      <view class="date-view">{{to || '结束日期'}}</view>
+    </picker>
+    <button class="query-btn" bindtap="refresh">查询</button>
+  </view>
+
+  <block wx:if="{{result}}">
+    <!-- 汇总 -->
+    <view class="card stat-grid">
+      <view class="stat-item">
+        <view class="stat-num">{{result.orderCount}}</view>
+        <view class="stat-label muted">订单数</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-num price">¥{{result.revenueText}}</view>
+        <view class="stat-label muted">营业额</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-num">{{result.pickupCount}}</view>
+        <view class="stat-label muted">自取</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-num">{{result.deliveryCount}}</view>
+        <view class="stat-label muted">配送</view>
+      </view>
+    </view>
+
+    <!-- 按状态 -->
+    <view class="card block">
+      <view class="block-title">按状态</view>
+      <view wx:if="{{!result.byStatus.length}}" class="kv-empty muted">暂无数据</view>
+      <view class="bar-row" wx:for="{{result.byStatus}}" wx:key="key">
+        <text class="bar-label {{item.key==='cancel'?'muted':''}}">{{item.label}}</text>
+        <view class="bar-track">
+          <view class="bar-fill c-{{item.key}}" style="width: {{maxBar ? (item.count/maxBar*100) : 0}}%"></view>
+        </view>
+        <text class="bar-val">{{item.count}}</text>
+      </view>
+    </view>
+
+    <!-- 热销菜品 -->
+    <view class="card block">
+      <view class="block-title">热销菜品</view>
+      <view wx:if="{{!result.topDishes.length}}" class="kv-empty muted">暂无数据</view>
+      <view class="top-item" wx:for="{{result.topDishes}}" wx:key="_id">
+        <text class="top-rank">{{index+1}}</text>
+        <text class="top-name ellipsis">{{item.name}}</text>
+        <text class="top-count muted">x{{item.count}}</text>
+        <text class="top-amount">¥{{item.amountText}}</text>
+      </view>
+    </view>
+  </block>
+  <view wx:if="{{fetching}}" class="empty muted">加载中…</view>
+
+  <view class="safe-bottom" />
+</view>

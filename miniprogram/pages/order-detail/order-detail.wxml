@@ -1,0 +1,46 @@
+<view class="page">
+  <view class="status-card">
+    <view class="status-title">{{statusText}}</view>
+    <view wx:if="{{!isDelivery}}" class="pickup-box">
+      <view class="pickup-label">取餐号</view>
+      <view class="pickup-no">{{pickupNo!==''&&pickupNo!=null?pickupNo:'--'}}</view>
+      <view class="pickup-tip muted">取餐时向店员出示此号</view>
+    </view>
+    <view wx:else class="pickup-box">
+      <view class="pickup-label">配送至</view>
+      <view class="pickup-no small">{{deliveryTarget||'--'}}</view>
+      <view class="pickup-tip muted">配送方式 · {{typeText}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{canNotify && (order.status==='pending' || order.status==='making' || (isDelivery && order.status==='ready'))}}" class="card notify-card">
+    <view class="muted">{{isDelivery ? '配送完成后会通过微信「服务通知」提醒你，请留意查收。' : '餐品制作完成后，会通过微信「服务通知」提醒你取餐。'}}</view>
+  </view>
+
+  <view class="card">
+    <view class="sec">餐品明细</view>
+    <view wx:for="{{items}}" wx:key="index" class="item between">
+      <view class="item-name">
+        {{item.name}}<text wx:if="{{item.spec}}" class="sub">{{item.spec}}</text>
+        <view wx:if="{{item.extras&&item.extras.length}}" class="sub">加料：{{item.extras}}</view>
+      </view>
+      <view class="right">
+        <text class="qty">×{{item.qty||1}}</text>
+        <text class="price">¥{{item.price}}</text>
+      </view>
+    </view>
+    <view class="between total-row">
+      <text>合计</text><text class="price big">¥{{total}}</text>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{note}}">
+    <view class="sec">备注</view>
+    <view class="muted">{{note}}</view>
+  </view>
+
+  <view class="card" wx:if="{{createdAt}}">
+    <view class="sec">下单时间</view>
+    <view class="muted">{{createdAt}}</view>
+  </view>
+</view>

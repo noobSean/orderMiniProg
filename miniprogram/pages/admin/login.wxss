@@ -1,0 +1,50 @@
+/* 管理后台登录页 */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 32rpx;
+  background: linear-gradient(180deg, #fff4ee 0%, var(--bg) 42%);
+}
+
+/* 顶部品牌区 */
+.login-hero { padding: 120rpx 0 64rpx; text-align: center; }
+.logo {
+  width: 136rpx;
+  height: 136rpx;
+  line-height: 136rpx;
+  margin: 0 auto 32rpx;
+  font-size: 64rpx;
+  background: linear-gradient(135deg, #ff8a5c, #ff6b35);
+  border-radius: 40rpx;
+  box-shadow: 0 16rpx 36rpx rgba(255, 107, 53, 0.28);
+}
+.hero-title { font-size: 46rpx; font-weight: 700; letter-spacing: 2rpx; }
+.hero-sub { margin-top: 14rpx; font-size: 26rpx; color: var(--text-weak); }
+
+/* 登录表单 */
+.login-card {
+  margin: 0;
+  padding: 40rpx 32rpx 36rpx;
+  border-radius: 28rpx;
+  box-shadow: 0 12rpx 40rpx rgba(31, 35, 41, 0.06);
+}
+.field {
+  display: flex;
+  align-items: center;
+  height: 104rpx;
+  padding: 0 24rpx;
+  margin-bottom: 36rpx;
+  background: var(--bg);
+  border-radius: 16rpx;
+}
+.field-icon { margin-right: 16rpx; font-size: 34rpx; }
+.field-input { flex: 1; height: 104rpx; font-size: 30rpx; }
+.field-ph { color: #b6bcc6; }
+.submit-btn { width: 100%; margin: 0; font-weight: 600; }
+.login-tip { margin-top: 24rpx; text-align: center; font-size: 23rpx; line-height: 1.6; }
+
+/* 返回与页脚 */
+.login-back { margin-top: 48rpx; }
+.back-btn { width: 100%; background: transparent; border-color: #dcdfe4; color: var(--text-weak); }
+.login-footer { margin-top: auto; padding: 60rpx 0 24rpx; text-align: center; font-size: 22rpx; }

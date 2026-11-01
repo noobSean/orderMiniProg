@@ -1,0 +1,24 @@
+<view class="page">
+  <view class="card form">
+    <view class="tip muted">首次使用请先绑定工号，便于下单与配送</view>
+    <view class="field">
+      <text class="label">工号</text>
+      <input class="input" placeholder="请输入工号" value="{{empNo}}" bindinput="onEmp" cursor-spacing="80" />
+    </view>
+    <view class="field">
+      <text class="label">姓名</text>
+      <input class="input" placeholder="请输入姓名" value="{{name}}" bindinput="onName" cursor-spacing="80" />
+    </view>
+    <view class="field dept-field" bindtap="onPickDept">
+      <text class="label">科室</text>
+      <view class="picker-like {{dept ? '' : 'placeholder'}}">{{dept || '请选择科室'}}</view>
+      <text class="arrow">›</text>
+    </view>
+    <view class="field">
+      <text class="label">工位/位置</text>
+      <input class="input" placeholder="如：3号楼-5层（选填）" value="{{location}}" bindinput="onLoc" cursor-spacing="80" />
+    </view>
+    <button class="btn-primary submit" bindtap="submit" loading="{{submitting}}" disabled="{{submitting}}">绑定</button>
+    <view class="relogin muted" bindtap="onLoginExisting">已绑定过？用当前微信直接登录</view>
+  </view>
+</view>

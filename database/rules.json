@@ -1,0 +1,38 @@
+{
+  "intro": "建议的云数据库安全规则（实际请在云开发控制台-数据库-权限设置中逐集合配置；以下为文字说明式建议，非可直接导入格式）",
+  "collections": {
+    "settings": {
+      "read": "任意登录用户可读（客户读取门店配置）",
+      "write": "仅管理员可写（建议由 settingsAdmin 云函数写入，客户端 write 关闭）"
+    },
+    "menu_categories": {
+      "read": "任意登录用户可读",
+      "write": "仅管理员可写（客户端 write 关闭，走 categoryAdmin 云函数）"
+    },
+    "dishes": {
+      "read": "任意登录用户可读（前端 getMenu 直读只取 available:true）",
+      "write": "仅管理员可写（客户端 write 关闭，走 dishAdmin 云函数）"
+    },
+    "employees": {
+      "read": "仅本人（auth.openid == doc.openid）可读；客户端不直读更佳",
+      "write": "关闭客户端写权限，绑定/解绑统一走 bindEmployee / employeeAdmin 云函数"
+    },
+    "orders": {
+      "read": "仅本人可读；管理端通过云函数 + 管理会话 token 读取",
+      "write": "仅本人（提交订单时）或管理员"
+    },
+    "departments": {
+      "read": "客户端不直读，统一走 deptAdmin 云函数（可设为仅创建者或关闭）",
+      "write": "仅管理员可写（走 deptAdmin 云函数）"
+    },
+    "admin_sessions": {
+      "read": "客户端不可读写（仅云函数可读写），避免管理 token 泄露",
+      "write": "客户端不可读写"
+    }
+  },
+  "recommendedExpression": {
+    "self-read": "doc.openid == auth.openid",
+    "admin-auth": "管理端鉴权已从 employees.admin 迁移到 admin_sessions 会话 token（云函数端校验），数据库规则不再用于识别管理员",
+    "note": "云开发安全规则不支持跨集合子查询，管理员操作统一走云函数（trusted 服务端），并把各集合客户端写权限收紧为「仅创建者」或关闭。"
+  }
+}

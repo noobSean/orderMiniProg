@@ -1,0 +1,20 @@
+.admin-page { padding-bottom: 40rpx; }
+
+/* 今日概览 */
+.today { margin-top: 20rpx; }
+.section-title { font-size: 30rpx; font-weight: 600; margin-bottom: 12rpx; }
+.stat-grid { display: flex; flex-wrap: wrap; }
+.stat-item { width: 50%; text-align: center; padding: 22rpx 0; }
+.stat-num { font-size: 42rpx; font-weight: 700; }
+.stat-label { font-size: 24rpx; margin-top: 6rpx; }
+
+/* 功能入口 */
+.entry-title { margin: 8rpx 32rpx 4rpx; font-size: 26rpx; }
+.entry-grid { display: flex; flex-wrap: wrap; padding: 12rpx 0; }
+.entry-item { width: 33.33%; text-align: center; padding: 24rpx 0; }
+.entry-icon { font-size: 54rpx; }
+.entry-name { font-size: 24rpx; margin-top: 12rpx; }
+
+/* 退出管理登录 */
+.logout-bar { margin: 40rpx 20rpx 0; }
+.logout-btn { width: 100%; background: #fff; border-color: #e2e5ea; color: var(--danger); }

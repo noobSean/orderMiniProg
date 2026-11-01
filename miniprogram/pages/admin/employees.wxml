@@ -1,0 +1,52 @@
+<view class="page emp-page" wx:if="{{ready}}">
+  <!-- 搜索：工号 / 姓名 / 科室 -->
+  <view class="emp-header">
+    <view class="emp-search-box">
+      <input class="emp-search" placeholder="搜索工号 / 姓名 / 科室" placeholder-class="emp-ph"
+        value="{{keyword}}" confirm-type="search" bindinput="onKeyword" bindconfirm="onSearch" />
+      <text wx:if="{{keyword}}" class="emp-clear" catchtap="onClearKeyword">×</text>
+    </view>
+    <view class="emp-search-btn" bindtap="onSearch">搜索</view>
+  </view>
+
+  <view class="emp-hint muted">
+    员工端提示「工号已被绑定」但员工无法绑定时，在此搜索该工号并解绑，工号释放后即可重新绑定。
+  </view>
+
+  <view class="emp-total muted">
+    共 {{total}} 条绑定记录<text wx:if="{{fallback}}" class="emp-fallback">（模糊匹配）</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="emp-empty muted">加载中…</view>
+
+  <view wx:elif="{{error}}" class="emp-empty">
+    <view class="muted">{{error}}</view>
+    <view class="emp-retry" bindtap="onSearch">点击重试</view>
+  </view>
+
+  <view wx:elif="{{!list.length}}" class="emp-empty muted">
+    {{keyword ? '没有匹配的绑定记录' : '暂无员工绑定记录'}}
+  </view>
+
+  <block wx:else>
+    <view class="emp-item" wx:for="{{list}}" wx:key="_id">
+      <view class="emp-main">
+        <view class="emp-line">
+          <text class="emp-no">{{item.empNo}}</text>
+          <text class="emp-name">{{item.name || '未填姓名'}}</text>
+          <text wx:if="{{item.admin}}" class="tag emp-admin">管理员</text>
+        </view>
+        <view class="emp-sub muted">{{item.deptText}}</view>
+        <view class="emp-sub muted">绑定时间 {{item.timeText}}</view>
+        <view class="emp-sub muted emp-openid">openid {{item.openidMask || '—'}}</view>
+      </view>
+      <view class="emp-release" data-id="{{item._id}}" data-no="{{item.empNo}}" data-name="{{item.name}}" bindtap="onRelease">解绑</view>
+    </view>
+
+    <view wx:if="{{loadingMore}}" class="emp-more muted">加载中…</view>
+    <view wx:elif="{{hasMore}}" class="emp-more emp-more-btn" bindtap="onLoadMore">加载更多</view>
+    <view wx:else class="emp-more muted">没有更多了</view>
+  </block>
+
+  <view class="safe-bottom" />
+</view>

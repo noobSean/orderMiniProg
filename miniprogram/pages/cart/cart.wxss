@@ -1,0 +1,71 @@
+/* 非 tabBar 页面 + 固定 footer：页面底部留白必须叠加安全区，
+   否则 iPhone 全面屏上最后一屏内容会被 footer 压住（footer 自身也因安全区变高）。 */
+.page { padding-bottom: calc(170rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(170rpx + env(safe-area-inset-bottom)); }
+.empty-card { text-align: center; }
+.empty { padding: 60rpx 0 20rpx; }
+.go { margin: 20rpx 40rpx; }
+
+.item { display: flex; align-items: center; }
+.item-main { flex: 1; min-width: 0; }
+.item-name { font-size: 30rpx; font-weight: 600; word-break: break-all; }
+.sub { font-size: 24rpx; color: var(--text-weak); margin-left: 10rpx; }
+.unit { font-size: 24rpx; margin-top: 8rpx; }
+.item-right { flex-shrink: 0; margin-left: 20rpx; display: flex; flex-direction: column; align-items: flex-end; }
+.del { font-size: 24rpx; margin-top: 12rpx; }
+
+.stepper { display: flex; align-items: center; }
+.step-btn { width: 46rpx; height: 46rpx; display: flex; align-items: center; justify-content: center; line-height: 1; text-align: center; border: 2rpx solid var(--primary); color: var(--primary); border-radius: 50%; font-size: 34rpx; flex-shrink: 0; }
+.step-btn.plus { background: var(--primary); color: #fff; }
+.qty { margin: 0 18rpx; min-width: 30rpx; text-align: center; }
+
+.sec { font-size: 28rpx; font-weight: 600; margin-bottom: 16rpx; }
+.way-row { display: flex; }
+.way { flex: 1; text-align: center; padding: 18rpx 0; border: 2rpx solid var(--line); border-radius: 12rpx; margin-right: 16rpx; color: var(--text); }
+.way:last-child { margin-right: 0; }
+.way.on { border-color: var(--primary); color: var(--primary); background: var(--primary-weak); }
+.hint { padding: 20rpx; background: var(--primary-weak); border-radius: 12rpx; font-size: 24rpx; }
+.picker-row { display: flex; align-items: center; padding: 20rpx 0; border-bottom: 2rpx solid var(--line); font-size: 28rpx; }
+.arrow { margin-left: auto; color: var(--text-weak); }
+.picker-val { min-width: 0; max-width: 60%; margin-left: 20rpx; color: var(--text-weak); text-align: right;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+/* input 用固定高度 + 行高垂直居中，键盘弹出时靠 wxml 里的 cursor-spacing 顶上去 */
+.note-input {
+  width: 100%;
+  background: var(--bg);
+  border-radius: 12rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+.field-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid var(--line);
+  font-size: 28rpx;
+}
+.field-label { color: var(--text); flex-shrink: 0; }
+.loc-input {
+  flex: 1;
+  min-width: 0;
+  margin-left: 32rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+  font-size: 28rpx;
+  background: var(--bg);
+  border-radius: 12rpx;
+  padding: 0 20rpx;
+  box-sizing: border-box;
+}
+
+/* 非 tabBar 页面底部固定栏：必须给 home 条留 padding，否则 iPhone 全面屏按钮贴到 home 条上 */
+.footer { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); padding: 16rpx 24rpx;
+  padding-bottom: calc(16rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  display: flex; align-items: center; box-shadow: 0 -6rpx 20rpx rgba(0,0,0,.08); }
+.total { flex: 1; min-width: 0; font-size: 28rpx; }
+.total .price { font-size: 36rpx; }
+.submit-btn { flex-shrink: 0; padding: 20rpx 60rpx; white-space: nowrap; }

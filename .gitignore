@@ -1,0 +1,20 @@
+# 依赖与构建产物
+node_modules/
+miniprogram_npm/
+cloudfunctions/*/node_modules/
+
+# 微信开发者工具 / CloudBase 本地私有配置（含本机路径等，不建议入库）
+.cloudbase/
+project.private.config.json
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.log
+
+# 临时文件
+.tmp*/
+*.tmp

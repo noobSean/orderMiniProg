@@ -1,0 +1,90 @@
+<view class="page form-page" wx:if="{{ready}}">
+  <!-- 基础信息 -->
+  <view class="card block">
+    <view class="block-title">基础信息</view>
+    <view class="form-row">
+      <text class="label">名称<text class="req">*</text></text>
+      <input class="input" placeholder="菜品名称" value="{{form.name}}" data-key="name" bindinput="onField" />
+    </view>
+    <view class="form-row">
+      <text class="label">分类<text class="req">*</text></text>
+      <picker class="picker" range="{{categories}}" range-key="name" value="{{catIndex}}" bindchange="onCat">
+        <view class="picker-view">{{catIndex>=0 ? categories[catIndex].name : '请选择分类'}}</view>
+      </picker>
+    </view>
+    <view class="form-row">
+      <text class="label">描述</text>
+      <input class="input" placeholder="口味/食材等描述" value="{{form.desc}}" data-key="desc" bindinput="onField" />
+    </view>
+    <view class="form-row">
+      <text class="label">价格(元)<text class="req">*</text></text>
+      <input class="input" type="digit" placeholder="0.00" value="{{form.price}}" data-key="price" bindinput="onField" />
+    </view>
+    <view class="form-row">
+      <text class="label">单位</text>
+      <input class="input" placeholder="份" value="{{form.unit}}" data-key="unit" bindinput="onField" />
+    </view>
+    <view class="form-row">
+      <text class="label">库存</text>
+      <input class="input" type="number" placeholder="留空=不限" value="{{form.stock}}" data-key="stock" bindinput="onStock" />
+    </view>
+    <view class="form-row">
+      <text class="label">排序</text>
+      <input class="input" type="number" placeholder="0" value="{{form.sort}}" data-key="sort" bindinput="onSort" />
+    </view>
+    <view class="form-row">
+      <text class="label">上架</text>
+      <switch checked="{{form.available}}" color="#ff6b35" bindchange="onSwitch" />
+    </view>
+  </view>
+
+  <!-- 规格 -->
+  <view class="card block">
+    <view class="block-title between">
+      <text>规格 (可选做法/规格)</text>
+      <text class="add-link" bindtap="addSpec">＋ 添加</text>
+    </view>
+    <view class="kv-line" wx:for="{{form.specs}}" wx:key="index">
+      <input class="kv-input name" placeholder="名称" value="{{item.name}}" data-index="{{index}}" data-key="name" bindinput="onSpecField" />
+      <input class="kv-input price" type="digit" placeholder="加价" value="{{item.price}}" data-index="{{index}}" data-key="price" bindinput="onSpecField" />
+      <text class="del" data-index="{{index}}" bindtap="delSpec">×</text>
+    </view>
+  </view>
+
+  <!-- 加料 -->
+  <view class="card block">
+    <view class="block-title between">
+      <text>加料 (可选加价)</text>
+      <text class="add-link" bindtap="addExtra">＋ 添加</text>
+    </view>
+    <view class="kv-line" wx:for="{{form.extras}}" wx:key="index">
+      <input class="kv-input name" placeholder="名称" value="{{item.name}}" data-index="{{index}}" data-key="name" bindinput="onExtraField" />
+      <input class="kv-input price" type="digit" placeholder="加价" value="{{item.price}}" data-index="{{index}}" data-key="price" bindinput="onExtraField" />
+      <text class="del" data-index="{{index}}" bindtap="delExtra">×</text>
+    </view>
+  </view>
+
+  <!-- 图片（上传到云存储，保存 fileID） -->
+  <view class="card block">
+    <view class="block-title between">
+      <text>图片</text>
+      <text wx:if="{{form.image && !uploading}}" class="add-link" bindtap="onChooseImage">更换</text>
+    </view>
+    <view class="img-row">
+      <view wx:if="{{form.image}}" class="img-preview {{uploading ? 'is-uploading' : ''}}" bindtap="onPreviewImage">
+        <image src="{{form.image}}" mode="aspectFill" />
+        <view wx:if="{{uploading}}" class="img-mask">{{uploadProgress}}%</view>
+        <view wx:else class="img-del" catchtap="onClearImage">×</view>
+      </view>
+      <view wx:else class="img-empty {{uploading ? 'is-uploading' : ''}}" bindtap="onChooseImage">
+        <text>{{uploading ? uploadProgress + '%' : '＋ 选择图片'}}</text>
+      </view>
+    </view>
+    <view class="img-hint muted">支持 jpg/png，建议 1:1 正方形、≤10MB；自动压缩后上传云存储，保存后员工端点餐页即可显示。</view>
+  </view>
+
+  <view class="safe-bottom" />
+  <view class="save-bar">
+    <button class="btn-primary save-btn" loading="{{saving}}" disabled="{{saving}}" bindtap="onSave">保存</button>
+  </view>
+</view>

@@ -1,0 +1,48 @@
+<view class="page" wx:if="{{ready}}">
+  <!-- 状态筛选 -->
+  <scroll-view scroll-x class="tabs" enable-flex>
+    <view wx:for="{{tabs}}" wx:key="key" class="tab {{activeTab===item.key?'active':''}}"
+          data-key="{{item.key}}" bindtap="onTab">{{item.label}}</view>
+  </scroll-view>
+
+  <view class="list">
+    <view wx:for="{{orders}}" wx:key="_id" class="card order-card" data-id="{{item._id}}" bindtap="onCard">
+      <view class="between">
+        <view class="order-no ellipsis">{{item.orderNo}}</view>
+        <view class="row head-tags">
+          <view class="tag status-tag s-{{item.status}}">{{item.statusLabel}}</view>
+          <view class="tag type-tag">{{item.typeLabel}}</view>
+        </view>
+      </view>
+
+      <view class="row order-meta muted">
+        <text>{{item.name || item.empNo || '未绑定'}}</text>
+        <text wx:if="{{item.dept}}" class="dot">·</text>
+        <text>{{item.dept}}</text>
+      </view>
+      <view class="row order-meta muted">
+        <text>{{item.typeLabel==='配送' ? '配送目标：' : '取餐号：'}}{{item.target || '—'}}</text>
+      </view>
+      <view wx:if="{{item.note}}" class="row order-meta note-line">
+        <text class="note-text">备注：{{item.note}}</text>
+      </view>
+
+      <view class="between order-bottom">
+        <text class="time muted">{{item.time}}</text>
+        <text class="price">¥{{item.amountText}}</text>
+      </view>
+
+      <view class="actions">
+        <button wx:if="{{item.showAccept}}" class="mini-btn primary" data-id="{{item._id}}" data-status="making" catchtap="onAction">接单</button>
+        <button wx:if="{{item.showMake}}" class="mini-btn primary" data-id="{{item._id}}" data-status="ready" catchtap="onAction">制作完成</button>
+        <button wx:if="{{item.showDeliver}}" class="mini-btn plain" data-id="{{item._id}}" data-status="ready" catchtap="onAction">配送</button>
+        <button wx:if="{{item.showDone}}" class="mini-btn primary" data-id="{{item._id}}" data-status="done" catchtap="onAction">完成</button>
+        <button wx:if="{{item.showCancel}}" class="mini-btn danger" data-id="{{item._id}}" data-status="cancel" catchtap="onAction">取消</button>
+      </view>
+    </view>
+
+    <view wx:if="{{!orders.length && !fetching}}" class="empty muted">暂无订单</view>
+    <view wx:if="{{fetchError}}" class="empty muted">{{fetchError}}</view>
+  </view>
+  <view class="safe-bottom" />
+</view>

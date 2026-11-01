@@ -1,0 +1,14 @@
+{"_id":"dish_1","categoryId":"cat_1","name":"黑椒牛柳饭","desc":"黑椒风味牛柳，配时蔬与米饭","image":"","price":28,"specs":[{"name":"标准份","price":0},{"name":"大份","price":5}],"extras":[{"name":"加蛋","price":2},{"name":"加饭","price":1}],"stock":50,"unit":"份","sort":1,"available":true}
+{"_id":"dish_2","categoryId":"cat_1","name":"宫保鸡丁套餐","desc":"川味宫保鸡丁，含米饭与小菜","image":"","price":26,"specs":[],"extras":[{"name":"加辣","price":0},{"name":"加饭","price":1}],"stock":null,"unit":"份","sort":2,"available":true}
+{"_id":"dish_3","categoryId":"cat_1","name":"番茄炒蛋盖饭","desc":"家常番茄炒蛋盖饭","image":"","price":18,"specs":[],"extras":[],"stock":30,"unit":"份","sort":3,"available":true}
+{"_id":"dish_4","categoryId":"cat_2","name":"扬州炒饭","desc":"粒粒分明，配火腿与青豆","image":"","price":16,"specs":[{"name":"标准","price":0},{"name":"加大量","price":4}],"extras":[],"stock":40,"unit":"份","sort":1,"available":true}
+{"_id":"dish_5","categoryId":"cat_2","name":"卤肉饭","desc":"台式卤肉配溏心蛋","image":"","price":22,"specs":[],"extras":[{"name":"加卤蛋","price":2}],"stock":25,"unit":"份","sort":2,"available":true}
+{"_id":"dish_6","categoryId":"cat_3","name":"手工水饺(12只)","desc":"现包水饺，可选馅料","image":"","price":20,"specs":[{"name":"猪肉白菜","price":0},{"name":"韭菜鸡蛋","price":2}],"extras":[],"stock":20,"unit":"份","sort":1,"available":true}
+{"_id":"dish_7","categoryId":"cat_3","name":"牛肉面","desc":"清汤牛肉面","image":"","price":24,"specs":[],"extras":[{"name":"加牛肉","price":6}],"stock":15,"unit":"碗","sort":2,"available":true}
+{"_id":"dish_8","categoryId":"cat_4","name":"鲜榨橙汁","desc":"当日鲜榨","image":"","price":12,"specs":[{"name":"中杯","price":0},{"name":"大杯","price":3}],"extras":[],"stock":null,"unit":"杯","sort":1,"available":true}
+{"_id":"dish_9","categoryId":"cat_4","name":"美式咖啡","desc":"现磨美式","image":"","price":10,"specs":[],"extras":[],"stock":100,"unit":"杯","sort":2,"available":true}
+{"_id":"dish_10","categoryId":"cat_4","name":"冰红茶","desc":"柠檬冰红茶","image":"","price":5,"specs":[],"extras":[],"stock":null,"unit":"杯","sort":3,"available":true}
+{"_id":"dish_11","categoryId":"cat_4","name":"矿泉水","desc":"瓶装饮用水","image":"","price":3,"specs":[],"extras":[],"stock":200,"unit":"瓶","sort":4,"available":true}
+{"_id":"dish_12","categoryId":"cat_5","name":"提拉米苏","desc":"意式经典甜点","image":"","price":15,"specs":[],"extras":[],"stock":8,"unit":"份","sort":1,"available":true}
+{"_id":"dish_13","categoryId":"cat_5","name":"芝士蛋糕","desc":"重芝士（库存为0，用于测试售罄拦截）","image":"","price":18,"specs":[],"extras":[],"stock":0,"unit":"份","sort":2,"available":true}
+{"_id":"dish_14","categoryId":"cat_5","name":"季节限定·鲜果塔","desc":"已下架样例：仅管理端可见","image":"","price":22,"specs":[],"extras":[],"stock":10,"unit":"份","sort":9,"available":false}

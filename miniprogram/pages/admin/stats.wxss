@@ -1,0 +1,39 @@
+.stats-page { padding-bottom: 40rpx; }
+
+.mode-bar { display: flex; background: #fff; border-bottom: 2rpx solid var(--line); }
+.mode { flex: 1; text-align: center; padding: 24rpx 0; font-size: 28rpx; color: var(--text-weak); position: relative; }
+.mode.active { color: var(--primary); font-weight: 600; }
+.mode.active::after { content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 8rpx; width: 48rpx; height: 6rpx; border-radius: 6rpx; background: var(--primary); }
+
+.range-row { display: flex; align-items: center; gap: 12rpx; }
+.date-view { font-size: 28rpx; padding: 12rpx 20rpx; background: var(--bg); border-radius: 10rpx; }
+.sep { color: var(--text-weak); }
+.query-btn { height: 64rpx; line-height: 64rpx; font-size: 26rpx; padding: 0 28rpx; border-radius: 999rpx; background: var(--primary); color: #fff; margin-left: auto !important; box-sizing: border-box; }
+.query-btn::after { border: none; }
+
+.stat-grid { display: flex; flex-wrap: wrap; margin-top: 20rpx; }
+.stat-item { width: 50%; text-align: center; padding: 22rpx 0; }
+.stat-num { font-size: 42rpx; font-weight: 700; }
+.stat-label { font-size: 24rpx; margin-top: 6rpx; }
+
+.block { margin-top: 0; }
+.block-title { font-size: 30rpx; font-weight: 600; margin-bottom: 16rpx; }
+.kv-empty { padding: 16rpx 0; font-size: 26rpx; }
+.bar-row { display: flex; align-items: center; padding: 8rpx 0; gap: 16rpx; }
+.bar-label { width: 110rpx; font-size: 26rpx; flex-shrink: 0; }
+.bar-track { flex: 1; height: 22rpx; background: var(--bg); border-radius: 999rpx; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999rpx; background: var(--primary); }
+.bar-fill.c-ready { background: var(--success); }
+.bar-fill.c-done { background: #9aa0a6; }
+.bar-fill.c-cancel { background: #d5d7da; }
+.bar-fill.c-pending { background: var(--warning); }
+.bar-val { width: 70rpx; text-align: right; font-size: 26rpx; }
+
+.top-item { display: flex; align-items: center; gap: 16rpx; padding: 14rpx 0; border-bottom: 2rpx solid var(--line); }
+.top-item:last-child { border-bottom: none; }
+.top-rank { width: 40rpx; height: 40rpx; line-height: 40rpx; text-align: center; border-radius: 8rpx; background: var(--primary-weak); color: var(--primary); font-size: 24rpx; flex-shrink: 0; }
+.top-name { flex: 1; font-size: 28rpx; }
+.top-count { font-size: 25rpx; }
+.top-amount { font-size: 26rpx; font-weight: 600; }
+
+.empty { text-align: center; padding: 80rpx 0; }

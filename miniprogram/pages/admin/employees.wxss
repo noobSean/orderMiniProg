@@ -1,0 +1,100 @@
+/* 员工绑定管理 */
+.emp-header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx;
+  background: #fff;
+}
+.emp-search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 72rpx;
+  padding: 0 24rpx;
+  background: var(--bg);
+  border-radius: 999rpx;
+}
+.emp-search {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  font-size: 28rpx;
+}
+.emp-ph { color: var(--text-weak); }
+.emp-clear {
+  flex-shrink: 0;
+  padding: 0 8rpx;
+  font-size: 36rpx;
+  line-height: 1;
+  color: var(--text-weak);
+}
+.emp-search-btn {
+  flex-shrink: 0;
+  height: 72rpx;
+  line-height: 72rpx;
+  padding: 0 30rpx;
+  font-size: 28rpx;
+  color: #fff;
+  background: var(--primary);
+  border-radius: 999rpx;
+}
+.emp-hint {
+  padding: 16rpx 30rpx 0;
+  font-size: 22rpx;
+  line-height: 1.6;
+}
+.emp-total {
+  padding: 20rpx 30rpx 12rpx;
+  font-size: 24rpx;
+}
+.emp-fallback { color: var(--warning); }
+.emp-empty {
+  padding: 120rpx 40rpx;
+  text-align: center;
+  font-size: 26rpx;
+}
+.emp-retry {
+  margin-top: 20rpx;
+  color: var(--primary);
+}
+.emp-item {
+  display: flex;
+  align-items: center;
+  margin: 0 20rpx 16rpx;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+}
+.emp-main { flex: 1; min-width: 0; }
+.emp-line { display: flex; align-items: baseline; flex-wrap: wrap; }
+.emp-no {
+  margin-right: 16rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+.emp-name { font-size: 28rpx; }
+.emp-admin {
+  color: var(--primary);
+  background: var(--primary-weak);
+}
+.emp-sub {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+}
+.emp-openid { word-break: break-all; }
+.emp-release {
+  flex-shrink: 0;
+  margin-left: 20rpx;
+  padding: 10rpx 26rpx;
+  font-size: 26rpx;
+  color: var(--danger);
+  border: 2rpx solid var(--danger);
+  border-radius: 999rpx;
+}
+.emp-more {
+  padding: 24rpx;
+  text-align: center;
+  font-size: 24rpx;
+}
+.emp-more-btn { color: var(--primary); }

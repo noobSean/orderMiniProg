@@ -1,0 +1,116 @@
+/* 全局样式与主题变量 */
+page {
+  --primary: #ff6b35;
+  --primary-weak: #fff1ea;
+  --bg: #f4f5f7;
+  --card: #ffffff;
+  --text: #1f2329;
+  --text-weak: #8a919d;
+  --line: #ececec;
+  --success: #07c160;
+  --danger: #fa5151;
+  --warning: #ffc300;
+
+  background: var(--bg);
+  color: var(--text);
+  font-size: 28rpx;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+view, text, button, input, image, scroll-view { box-sizing: border-box; }
+
+/* ===== 微信基础组件 button 默认样式重置 =====
+   基础组件会为 button 注入固定宽度（部分基础库下为 184px）与 auto 外边距，
+   导致按钮被撑成固定宽度：flex 行里把相邻文字挤成 0 宽（如菜单管理卡片），
+   或整行按钮溢出屏幕。这里统一重置为自适应宽度：
+   - 普通块级场景：自动撑满父容器（等价于 width:100% 且不会溢出）；
+   - flex 场景：按内容自适应宽度。
+   个别需要固定宽度的地方请在具体类中显式写 width（会覆盖本规则需加 !important）。 */
+button {
+  width: auto !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.page { min-height: 100vh; }
+.card {
+  background: var(--card);
+  border-radius: 16rpx;
+  margin: 20rpx;
+  padding: 24rpx;
+}
+.row { display: flex; align-items: center; }
+.between { display: flex; align-items: center; justify-content: space-between; }
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  text-align: center;
+  padding: 20rpx 0;
+  white-space: nowrap;
+}
+.btn-primary::after { border: none; }
+.btn-primary[disabled] { opacity: 0.5; }
+.btn-plain {
+  background: #fff;
+  color: var(--primary);
+  border: 2rpx solid var(--primary);
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  text-align: center;
+  padding: 18rpx 0;
+  white-space: nowrap;
+}
+.btn-plain::after { border: none; }
+.tag {
+  display: inline-block;
+  font-size: 22rpx;
+  border-radius: 6rpx;
+  padding: 2rpx 12rpx;
+  margin-left: 12rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.muted { color: var(--text-weak); }
+.price { color: var(--primary); font-weight: 600; }
+.ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* ================= 真机适配工具类（全站通用） ================= */
+
+/* 多行省略：长菜名 / 长科室名 / 公告等，避免把卡片撑破 */
+.ellipsis-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  word-break: break-all;
+}
+.ellipsis-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  word-break: break-all;
+}
+.nowrap { white-space: nowrap; }
+.word-break { word-break: break-all; }
+
+/* flex 子项防溢出三件套：配合 .ellipsis 用于文字被挤压的场景 */
+.min-w-0 { min-width: 0; }
+.flex-1 { flex: 1; }
+.shrink-0 { flex-shrink: 0; }
+
+/* 底部安全区占位（用在 scroll-view 末尾，如 dept-select / 管理端列表）。
+   注意：原生 tabBar 页面的可视区已经不包含 tabBar，页面底部不要再额外加安全区，
+   否则会多出一条 home 条高度的空白；只有「非 tabBar 页面」的底部固定栏/内容才需要。
+   iOS 11.0~11.2 只认 constant()，所以两条一起写，不认识的那条会被自动忽略。 */
+.safe-bottom {
+  height: constant(safe-area-inset-bottom);
+  height: env(safe-area-inset-bottom);
+}
+/* 非 tabBar 页面容器底部安全区内边距（无固定底栏时使用） */
+.pb-safe {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}

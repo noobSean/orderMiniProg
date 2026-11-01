@@ -1,0 +1,67 @@
+<view class="page">
+  <!-- 正在恢复登录 -->
+  <block wx:if="{{loading}}">
+    <view class="card center">
+      <view class="muted">正在恢复登录…</view>
+    </view>
+  </block>
+
+  <!-- 已登录：显示员工档案 -->
+  <block wx:elif="{{profile}}">
+    <view class="card head">
+      <view class="avatar">{{profile.name ? profile.name[0] : '员'}}</view>
+      <view class="head-main">
+        <view class="name">{{profile.name}}<text wx:if="{{profile.admin}}" class="admin-tag">管理员</text></view>
+        <view class="muted">工号 {{profile.empNo}}</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="cell"><text class="k">部门</text><text class="v">{{profile.dept||'--'}}</text></view>
+      <view class="cell"><text class="k">配送位置</text><text class="v">{{profile.location||'--'}}</text></view>
+    </view>
+
+    <view class="card btns">
+      <button class="btn-plain logout" bindtap="logout">退出登录</button>
+    </view>
+  </block>
+
+  <!-- 主动退出过：需要手动重新登录 -->
+  <block wx:elif="{{state === 'logged_out'}}">
+    <view class="card center">
+      <view class="state-title">已退出登录</view>
+      <view class="muted state-sub">用当前微信登录即可恢复已绑定的工号</view>
+      <button class="btn-primary bind-btn" loading="{{loggingIn}}" disabled="{{loggingIn}}" bindtap="onLogin">重新登录</button>
+      <button class="btn-plain bind-btn second" bindtap="goBind">绑定其他工号</button>
+    </view>
+  </block>
+
+  <!-- 登录状态校验失败（网络等） -->
+  <block wx:elif="{{state === 'error'}}">
+    <view class="card center">
+      <view class="state-title">无法验证登录状态</view>
+      <view class="muted state-sub">{{errorMsg || '网络异常，请稍后重试'}}</view>
+      <button class="btn-primary bind-btn" bindtap="onRetry">重试</button>
+      <button class="btn-plain bind-btn second" bindtap="goBind">去绑定工号</button>
+    </view>
+  </block>
+
+  <!-- 未绑定 -->
+  <block wx:else>
+    <view class="card center">
+      <view class="muted">尚未绑定工号</view>
+      <button class="btn-primary bind-btn" bindtap="goBind">去绑定</button>
+      <view class="foot-tip muted">已绑定过？请使用原来的微信；也可在绑定页点「已绑定过，直接登录」恢复</view>
+    </view>
+  </block>
+
+  <!-- 管理后台入口：无需先绑定员工账号，管理员输入口令即可进入 -->
+  <view class="admin-entry" bindtap="openAdmin">
+    <view class="admin-entry-main">
+      <text class="admin-entry-title">管理后台</text>
+      <text class="admin-entry-sub">{{adminSession ? '已登录管理端，点击进入' : '管理员输入口令进入'}}</text>
+    </view>
+    <text class="admin-entry-arrow">›</text>
+  </view>
+  <view class="foot-tip muted">员工账号与管理员入口相互独立</view>
+</view>

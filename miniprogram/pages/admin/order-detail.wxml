@@ -1,0 +1,74 @@
+<view class="page detail-page" wx:if="{{ready}}">
+  <view wx:if="{{fetching}}" class="empty muted">加载中…</view>
+  <block wx:elif="{{detail}}">
+    <!-- 头部 -->
+    <view class="card head">
+      <view class="between">
+        <view class="d-no">{{detail.orderNo}}</view>
+        <view class="row head-tags">
+          <view class="tag status-tag s-{{detail.statusClass}}">{{detail.statusLabel}}</view>
+          <view class="tag type-tag">{{detail.typeLabel}}</view>
+        </view>
+      </view>
+      <view class="row head-meta muted"><text>下单时间：{{detail.time}}</text></view>
+    </view>
+
+    <!-- 买家信息 -->
+    <view class="card block">
+      <view class="block-title">买家信息</view>
+      <view class="kv"><text class="k">姓名</text><text class="v">{{detail.name || '—'}}</text></view>
+      <view class="kv"><text class="k">工号</text><text class="v">{{detail.empNo || '—'}}</text></view>
+      <view class="kv"><text class="k">部门</text><text class="v">{{detail.dept || '—'}}</text></view>
+      <view class="kv"><text class="k">位置</text><text class="v">{{detail.location || '—'}}</text></view>
+      <view class="kv" wx:if="{{detail.type==='delivery'}}"><text class="k">配送目标</text><text class="v">{{detail.target || '—'}}</text></view>
+      <view class="kv" wx:else><text class="k">取餐号</text><text class="v">{{detail.pickupNo || '—'}}</text></view>
+    </view>
+
+    <!-- 菜品 -->
+    <view class="card block">
+      <view class="block-title">菜品明细</view>
+      <view class="line-item" wx:for="{{detail.items}}" wx:key="_id">
+        <view class="between">
+          <text class="i-name ellipsis">{{item.name}}</text>
+          <text class="i-price">¥{{item.lineTotal}}</text>
+        </view>
+        <view class="i-sub muted" wx:if="{{item.spec}}">做法：{{item.spec}}</view>
+        <view class="i-sub muted" wx:if="{{item.extras.length}}">加料：<text wx:for="{{item.extras}}" wx:for-item="ex" wx:key="name">{{ex.name}}</text></view>
+        <view class="i-sub muted">x{{item.qty}} · 单价 ¥{{item.price}}</view>
+      </view>
+      <view class="between total-row">
+        <text class="muted">合计</text>
+        <text class="price total">¥{{detail.totalText}}</text>
+      </view>
+    </view>
+
+    <!-- 备注 / 时间 -->
+    <view class="card block">
+      <view class="block-title">其他信息</view>
+      <view class="kv"><text class="k">备注</text><text class="v">{{detail.note || '无'}}</text></view>
+    </view>
+
+    <!-- 状态历史 -->
+    <view class="card block" wx:if="{{detail.history.length}}">
+      <view class="block-title">状态历史</view>
+      <view class="hist-item" wx:for="{{detail.history}}" wx:key="index">
+        <view class="hist-dot"></view>
+        <view class="hist-body">
+          <view class="hist-text">{{item.text}}</view>
+          <view class="hist-time muted">{{item.time}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮（按当前状态） -->
+    <view wx:if="{{actions.length}}" class="action-bar">
+      <button wx:for="{{actions}}" wx:key="key"
+              class="act {{item.type==='danger' ? 'danger' : (item.type==='plain' ? 'plain' : 'primary')}}"
+              data-status="{{item.key}}" bindtap="onAction">{{item.text}}</button>
+    </view>
+
+    <view class="safe-bottom" />
+    <view class="safe-bottom" />
+  </block>
+  <view wx:else class="empty muted">未找到订单</view>
+</view>

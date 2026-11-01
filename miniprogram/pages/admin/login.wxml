@@ -1,0 +1,35 @@
+<!-- 管理后台登录：口令输入；会话有效时自动进入 -->
+<view class="page login-page">
+  <view class="login-hero">
+    <view class="logo">🔐</view>
+    <view class="hero-title">管理后台</view>
+    <view class="hero-sub">输入管理口令，进入门店管理</view>
+  </view>
+
+  <view class="card login-card">
+    <view class="field">
+      <text class="field-icon">🔑</text>
+      <input
+        class="field-input"
+        password
+        type="text"
+        maxlength="32"
+        placeholder="请输入管理口令"
+        placeholder-class="field-ph"
+        value="{{pwd}}"
+        bindinput="onPwdInput"
+        confirm-type="done"
+        bindconfirm="onSubmit"
+      />
+    </view>
+    <button class="btn-primary submit-btn" loading="{{loading}}" disabled="{{loading}}" bindtap="onSubmit">{{loading ? '验证中…' : '进入管理后台'}}</button>
+    <view class="login-tip muted">登录状态 12 小时内有效，过期需重新输入口令</view>
+  </view>
+
+  <view class="login-back">
+    <button class="btn-plain back-btn" bindtap="onBack">返回</button>
+  </view>
+
+  <view class="login-footer muted">企业点餐 · 管理端</view>
+  <view class="safe-bottom" />
+</view>

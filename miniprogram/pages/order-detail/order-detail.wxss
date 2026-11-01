@@ -1,0 +1,28 @@
+/* 非 tabBar 页面：没有固定底栏，但底部要给 home 条留白（constant 兜底 iOS 11.0~11.2） */
+.page { padding: 8rpx 0 40rpx;
+  padding-bottom: calc(40rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom)); }
+.status-card { margin: 20rpx; padding: 30rpx; border-radius: 20rpx; text-align: center;
+  background: linear-gradient(135deg, var(--primary), #ff915f); color: #fff; }
+.status-title { font-size: 34rpx; font-weight: 700; }
+.pickup-box { margin-top: 24rpx; }
+.pickup-label { font-size: 24rpx; opacity: .9; }
+/* 取餐号/配送地址都可能很长：允许换行，超宽时按字符断行，不能横向溢出卡片 */
+.pickup-no { max-width: 100%; padding: 0 24rpx; font-size: 72rpx; font-weight: 800; line-height: 1.2; letter-spacing: 6rpx; margin: 6rpx 0; word-break: break-all; }
+.pickup-no.small { font-size: 40rpx; line-height: 1.35; letter-spacing: 0; word-break: break-all; }
+.pickup-tip { color: rgba(255,255,255,.85); font-size: 22rpx; }
+
+.card .sec { font-size: 28rpx; font-weight: 600; margin-bottom: 16rpx; }
+.item { padding: 16rpx 0; border-bottom: 2rpx solid var(--line); }
+.item-name { flex: 1; min-width: 0; font-size: 28rpx; word-break: break-all; }
+.sub { font-size: 22rpx; color: var(--text-weak); margin-left: 8rpx; word-break: break-all; }
+.right { text-align: right; flex-shrink: 0; margin-left: 20rpx; }
+.qty { color: var(--text-weak); font-size: 24rpx; margin-right: 16rpx; }
+.price { font-size: 28rpx; }
+/* 备注/时间等长文本：没有空格的长字符串（URL、单号）也不会把卡片撑宽 */
+.card .muted { word-break: break-all; }
+.total-row { margin-top: 20rpx; }
+.price.big { font-size: 36rpx; }
+
+/* 订阅消息提示 */
+.notify-card { font-size: 24rpx; line-height: 1.6; }

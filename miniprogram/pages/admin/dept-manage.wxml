@@ -1,0 +1,43 @@
+<view class="page" wx:if="{{ready}}">
+  <view class="dm-header">
+    <input class="dm-search" placeholder="搜索科室 / 拼音" value="{{keyword}}" bindinput="onSearch" />
+    <view class="dm-add" bindtap="openAdd">＋ 新增</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="tip muted">加载中…</view>
+  <view wx:elif="{{!filtered.length}}" class="tip muted">暂无科室</view>
+  <view wx:else class="dm-list">
+    <view class="dm-item" wx:for="{{filtered}}" wx:key="_id">
+      <view class="dm-main">
+        <view class="dm-name">{{item.name}}<text class="dm-root muted">{{item.rootName}}</text></view>
+        <view class="dm-sub {{item.enabled ? 'on' : 'off'}}">{{item.pinyin || '—'}} · {{item.enabled ? '启用中' : '已停用'}}</view>
+      </view>
+      <view class="dm-ops">
+        <text class="op" data-id="{{item._id}}" bindtap="openEdit">编辑</text>
+        <text class="op" data-id="{{item._id}}" bindtap="toggle">{{item.enabled ? '停用' : '启用'}}</text>
+        <text class="op danger" data-id="{{item._id}}" bindtap="remove">删除</text>
+      </view>
+    </view>
+  </view>
+  <view class="safe-bottom" />
+
+  <view wx:if="{{showForm}}" class="mask" bindtap="closeForm"></view>
+  <view wx:if="{{showForm}}" class="sheet">
+    <view class="sheet-title">{{isEdit ? '编辑科室' : '新增科室'}}</view>
+    <view class="frow"><text class="flabel">名称</text><input class="finput" value="{{form.name}}" data-key="name" bindinput="onFormField" placeholder="科室名称" /></view>
+    <view class="frow"><text class="flabel">拼音码</text><input class="finput" value="{{form.pinyin}}" data-key="pinyin" bindinput="onFormField" placeholder="如 NK（便于搜索，选填）" /></view>
+    <view class="frow">
+      <text class="flabel">分类</text>
+      <picker mode="selector" range="{{rootNames}}" value="{{form.rootIndex}}" bindchange="onRootPick">
+        <view class="finput picker">{{rootNames[form.rootIndex] || '选择分类'}}<text class="arrow">›</text></view>
+      </picker>
+    </view>
+    <view class="frow"><text class="flabel">排序</text><input class="finput" type="number" value="{{form.sort}}" data-key="sort" bindinput="onFormField" placeholder="数字越小越靠前（选填）" /></view>
+    <view class="frow"><text class="flabel">启用</text><switch checked="{{form.enabled}}" color="#ff6b35" bindchange="onFormSwitch" /></view>
+    <view class="sheet-btns">
+      <button class="btn-plain" bindtap="closeForm">取消</button>
+      <button class="btn-primary" loading="{{saving}}" disabled="{{saving}}" bindtap="save">保存</button>
+    </view>
+    <view class="safe-bottom" />
+  </view>
+</view>

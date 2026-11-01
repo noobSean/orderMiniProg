@@ -1,0 +1,15 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="center muted">加载中…</view>
+  <view wx:if="{{!loading && !list.length}}" class="center muted">暂无订单，去点餐吧～</view>
+
+  <view wx:for="{{list}}" wx:key="_id" class="card order" data-id="{{item._id}}" bindtap="goDetail">
+    <view class="between">
+      <view class="order-no">单号 {{item.orderNo||item._id}}</view>
+      <text class="tag st-{{item.status}}">{{item.statusText}}</text>
+    </view>
+    <view class="between subline">
+      <view class="muted">{{item.typeText}} · {{item.timeText}}</view>
+      <view class="price">¥{{item.total}}</view>
+    </view>
+  </view>
+</view>

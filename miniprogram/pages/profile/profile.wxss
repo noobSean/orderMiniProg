@@ -1,0 +1,30 @@
+.page { padding: 8rpx 0 40rpx; }
+.card { margin: 20rpx; }
+.head { display: flex; align-items: center; }
+.avatar { width: 110rpx; height: 110rpx; border-radius: 50%; background: var(--primary); color: #fff;
+  text-align: center; line-height: 110rpx; font-size: 44rpx; font-weight: 600; flex-shrink: 0; }
+.head-main { margin-left: 26rpx; flex: 1; min-width: 0; }
+.name { font-size: 34rpx; font-weight: 600; }
+.admin-tag { font-size: 20rpx; color: #fff; background: var(--warning); border-radius: 6rpx; padding: 2rpx 10rpx; margin-left: 12rpx; vertical-align: middle; }
+.cell { display: flex; justify-content: space-between; padding: 20rpx 0; font-size: 28rpx; }
+.cell .k { color: var(--text-weak); }
+.cell .v { font-weight: 500; }
+.btns { padding-top: 30rpx; }
+.logout { margin-top: 0; }
+.center { text-align: center; padding: 60rpx 0; }
+.center .muted { padding-bottom: 20rpx; }
+.bind-btn { margin: 0 40rpx; }
+
+/* 管理后台入口（始终展示，不依赖员工绑定） */
+.admin-entry { display: flex; align-items: center; margin: 40rpx 20rpx 0; padding: 26rpx 24rpx;
+  background: var(--card); border-radius: 16rpx; }
+.admin-entry-main { flex: 1; display: flex; flex-direction: column; }
+.admin-entry-title { font-size: 28rpx; font-weight: 600; }
+.admin-entry-sub { font-size: 22rpx; color: var(--text-weak); margin-top: 4rpx; }
+.admin-entry-arrow { color: var(--text-weak); font-size: 34rpx; }
+.foot-tip { text-align: center; font-size: 22rpx; margin-top: 24rpx; }
+
+/* 登录状态区块 */
+.state-title { font-size: 32rpx; font-weight: 600; }
+.state-sub { font-size: 24rpx; margin: 12rpx 0 8rpx; line-height: 1.6; }
+.bind-btn.second { margin-top: 20rpx; }

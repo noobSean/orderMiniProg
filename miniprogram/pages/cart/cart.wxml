@@ -1,0 +1,46 @@
+<view class="page">
+  <view wx:if="{{!list.length}}" class="card empty-card">
+    <view class="empty muted">购物车空空如也，去点餐吧～</view>
+    <button class="btn-primary go" bindtap="goMenu">去点餐</button>
+  </view>
+
+  <view wx:for="{{list}}" wx:key="index" class="card item">
+    <view class="item-main">
+      <view class="item-name">{{item.name}}<text wx:if="{{item.spec}}" class="sub">{{item.spec}}</text></view>
+      <view wx:if="{{item.extras.length}}" class="sub">加料：{{item.extras}}</view>
+      <view class="muted unit">¥{{item.price}} × {{item.qty}}</view>
+    </view>
+    <view class="item-right">
+      <view class="stepper">
+        <view class="step-btn" data-idx="{{index}}" catchtap="dec">−</view>
+        <text class="qty">{{item.qty}}</text>
+        <view class="step-btn plus" data-idx="{{index}}" catchtap="inc">＋</view>
+      </view>
+      <view class="del muted" data-idx="{{index}}" catchtap="del">删除</view>
+    </view>
+  </view>
+
+  <view wx:if="{{list.length}}" class="card">
+    <view class="sec">收货方式</view>
+    <view class="way-row">
+      <view wx:if="{{settings.allowSelfPickup}}" class="way {{takeWay==='pickup'?'on':''}}" data-v="pickup" bindtap="onTakeWay">自取</view>
+      <view wx:if="{{settings.allowDelivery}}" class="way {{takeWay==='delivery'?'on':''}}" data-v="delivery" bindtap="onTakeWay">配送</view>
+    </view>
+
+    <view wx:if="{{takeWay==='pickup'}}" class="hint muted">到店后凭取餐号领取餐品；下单时会请求微信通知权限，下单成功和餐品做好时都会提醒你。</view>
+
+    <block wx:else>
+      <view class="hint muted">配送完成时会通过微信通知提醒你（下单时请求授权）。</view>
+      <view class="picker-row" bindtap="onPickDept">配送科室<text class="arrow">›</text><text class="picker-val">{{deptName||'请选择科室'}}</text></view>
+      <view class="field-row"><text class="field-label">具体位置</text><input class="loc-input" placeholder="如：B2层-茶水间（选填）" value="{{location}}" bindinput="onLoc" cursor-spacing="100" /></view>
+    </block>
+
+    <view class="sec" style="margin-top:24rpx">备注</view>
+    <input class="note-input" placeholder="如：少辣、不要葱" value="{{note}}" bindinput="onNote" cursor-spacing="100" />
+  </view>
+
+  <view wx:if="{{list.length}}" class="footer">
+    <view class="total">合计 <text class="price">¥{{totalAmount}}</text></view>
+    <button class="btn-primary submit-btn" bindtap="submit" loading="{{submitting}}" disabled="{{submitting}}">提交订单</button>
+  </view>
+</view>

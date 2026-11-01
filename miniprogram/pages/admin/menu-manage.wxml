@@ -1,0 +1,43 @@
+<view class="page" wx:if="{{ready}}">
+  <!-- 新增菜品 -->
+  <view class="add-dish-bar">
+    <button class="btn-plain add-btn" bindtap="onAddDish">＋ 新增菜品</button>
+  </view>
+
+  <!-- 分类横向标签 -->
+  <scroll-view scroll-x class="tabs" enable-flex>
+    <view class="tab {{activeCat===item._id?'active':''}}" wx:for="{{categories}}" wx:key="_id"
+          data-id="{{item._id}}" bindtap="onCat">
+      {{item.name}}
+      <text class="cat-ops" catchtap="onEditCat" data-id="{{item._id}}">✎</text>
+      <text class="cat-ops del" catchtap="onDelCat" data-id="{{item._id}}">🗑</text>
+    </view>
+    <view class="cat-add" bindtap="onAddCat">＋</view>
+  </scroll-view>
+
+  <!-- 菜品列表 -->
+  <view class="list">
+    <view wx:for="{{displayDishes}}" wx:key="_id" class="card dish-card">
+      <view class="between">
+        <image wx:if="{{item.image}}" class="dish-thumb" src="{{item.image}}" mode="aspectFill" />
+        <view class="dish-main">
+          <view class="row">
+            <text class="dish-name ellipsis">{{item.name}}</text>
+            <view class="tag avail {{item.available?'on':'off'}}">{{item.available?'在售':'已下架'}}</view>
+          </view>
+          <view class="dish-sub muted">
+            ¥{{item.priceText}} / {{item.unit}}
+            <text wx:if="{{item.specCount}}"> · {{item.specCount}}规格</text>
+            <text wx:if="{{item.extraCount}}"> · {{item.extraCount}}加料</text>
+          </view>
+        </view>
+        <view class="row dish-ops">
+          <button class="mini-btn plain" data-id="{{item._id}}" catchtap="onToggle">{{item.available?'下架':'上架'}}</button>
+          <button class="mini-btn primary" data-id="{{item._id}}" catchtap="onEditDish">编辑</button>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{!displayDishes.length && !fetching}}" class="empty muted">暂无菜品</view>
+  </view>
+  <view class="safe-bottom" />
+</view>

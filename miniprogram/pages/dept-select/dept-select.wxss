@@ -1,0 +1,14 @@
+/* 非 tabBar 页面：整页 flex + 列表 scroll-view 内部滚动；搜索栏不参与压缩 */
+.page { display: flex; flex-direction: column; height: 100vh; background: var(--bg); }
+.search-bar { flex-shrink: 0; padding: 20rpx; background: #fff; }
+.search-input { background: var(--bg); border-radius: 999rpx; height: 80rpx; line-height: 80rpx; padding: 0 28rpx; font-size: 28rpx; box-sizing: border-box; }
+.tip { padding: 60rpx; text-align: center; }
+.list-scroll { flex: 1; height: 0; }
+.group-title { padding: 20rpx 30rpx 10rpx; font-size: 24rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.dept-item { display: flex; align-items: center; background: #fff; padding: 26rpx 30rpx; border-bottom: 2rpx solid var(--line); }
+.dept-item:active { background: #fafafa; }
+/* 长科室名省略，拼音不换行，避免一行被撑爆/折成三行 */
+.dept-name { flex: 1; min-width: 0; margin-right: 20rpx; font-size: 30rpx;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.dept-py { flex-shrink: 0; max-width: 40%; font-size: 22rpx;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }

@@ -1,0 +1,42 @@
+/* 状态 Tab */
+.tabs { white-space: nowrap; background: #fff; position: sticky; top: 0; z-index: 5; display: flex; }
+.tab {
+  display: inline-block; padding: 26rpx 32rpx; font-size: 28rpx; color: var(--text-weak);
+  flex-shrink: 0; position: relative;
+}
+.tab.active { color: var(--primary); font-weight: 600; }
+.tab.active::after {
+  content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: 10rpx; width: 40rpx; height: 6rpx; border-radius: 6rpx; background: var(--primary);
+}
+
+/* 订单卡片 */
+.order-card { position: relative; }
+.order-no { font-weight: 600; font-size: 30rpx; max-width: 55%; }
+.head-tags { gap: 8rpx; }
+.type-tag { background: var(--primary-weak); color: var(--primary); }
+.status-tag.s-pending { background: var(--warning); color: #fff; }
+.status-tag.s-making { background: var(--primary); color: #fff; }
+.status-tag.s-ready { background: var(--success); color: #fff; }
+.status-tag.s-done { background: #eef0f3; color: var(--text-weak); }
+.status-tag.s-cancel { background: #eef0f3; color: var(--text-weak); }
+.order-meta { margin-top: 12rpx; font-size: 26rpx; }
+.dot { margin: 0 10rpx; }
+.order-bottom { margin-top: 16rpx; }
+.time { font-size: 24rpx; }
+
+.actions {
+  display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 18rpx;
+  border-top: 2rpx solid var(--line); padding-top: 18rpx;
+}
+.mini-btn { height: 64rpx; line-height: 64rpx; font-size: 26rpx; padding: 0 30rpx; border-radius: 999rpx; margin: 0; box-sizing: border-box; }
+.mini-btn.primary { background: var(--primary); color: #fff; }
+.mini-btn.plain { background: #fff; color: var(--primary); border: 2rpx solid var(--primary); line-height: 60rpx; }
+.mini-btn.danger { background: var(--danger); color: #fff; }
+.mini-btn::after { border: none; }
+
+.empty { text-align: center; padding: 120rpx 0; }
+
+/* 订单备注 */
+.note-line { align-items: flex-start; }
+.note-text { color: var(--danger); word-break: break-all; }

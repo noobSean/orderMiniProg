@@ -1,0 +1,4 @@
+{
+  "desc": "企业内网点单，无需被搜索收录",
+  "rules": [{ "action": "disallow", "page": "*" }]
+}

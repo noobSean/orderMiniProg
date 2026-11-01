@@ -1,0 +1,47 @@
+.detail-page { padding-bottom: 180rpx; }
+
+/* 头部 */
+.head { margin-top: 20rpx; }
+.d-no { font-weight: 700; font-size: 32rpx; }
+.head-tags { gap: 8rpx; }
+.type-tag { background: var(--primary-weak); color: var(--primary); }
+.status-tag.s-pending { background: var(--warning); color: #fff; }
+.status-tag.s-making { background: var(--primary); color: #fff; }
+.status-tag.s-ready { background: var(--success); color: #fff; }
+.status-tag.s-done { background: #eef0f3; color: var(--text-weak); }
+.status-tag.s-cancel { background: #eef0f3; color: var(--text-weak); }
+.head-meta { margin-top: 14rpx; font-size: 24rpx; }
+
+/* 信息块 */
+.block { margin-top: 0; }
+.block-title { font-size: 30rpx; font-weight: 600; margin-bottom: 16rpx; }
+.kv { display: flex; padding: 10rpx 0; font-size: 27rpx; }
+.kv .k { width: 160rpx; color: var(--text-weak); flex-shrink: 0; }
+.kv .v { flex: 1; }
+
+/* 菜品 */
+.line-item { padding: 14rpx 0; border-bottom: 2rpx solid var(--line); }
+.line-item:last-child { border-bottom: none; }
+.i-name { max-width: 70%; font-size: 28rpx; }
+.i-price { color: var(--text); font-weight: 600; }
+.i-sub { font-size: 24rpx; margin-top: 6rpx; }
+.total-row { margin-top: 12rpx; padding-top: 16rpx; border-top: 2rpx solid var(--line); }
+.total { font-size: 34rpx; }
+
+/* 状态历史 */
+.hist-item { display: flex; padding: 10rpx 0; }
+.hist-dot { width: 14rpx; height: 14rpx; border-radius: 50%; background: var(--primary); margin: 12rpx 18rpx 0 4rpx; flex-shrink: 0; }
+.hist-text { font-size: 27rpx; }
+.hist-time { font-size: 23rpx; margin-top: 2rpx; }
+
+.empty { text-align: center; padding: 120rpx 0; }
+.action-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; background: #fff;
+  padding: 16rpx 20rpx calc(16rpx + env(safe-area-inset-bottom));
+  display: flex; gap: 20rpx; box-shadow: 0 -4rpx 12rpx rgba(0,0,0,0.04);
+}
+.act { flex: 1; font-size: 30rpx; border-radius: 999rpx; line-height: 2.4; margin: 0; }
+.act::after { border: none; }
+.act.primary { background: var(--primary); color: #fff; }
+.act.plain { background: #fff; color: var(--primary); border: 2rpx solid var(--primary); }
+.act.danger { background: var(--danger); color: #fff; }

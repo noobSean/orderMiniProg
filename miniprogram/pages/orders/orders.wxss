@@ -1,0 +1,17 @@
+/* orders 是原生 tabBar 页面：页面可视区已避开 tabBar，底部不需要再补安全区 */
+.page { padding: 8rpx 0 40rpx; }
+.center { text-align: center; padding: 120rpx 0; }
+.order { margin: 20rpx; }
+/* 订单号可能很长（单号 + _id），加省略号避免把状态标签挤出屏幕 */
+.order-no { flex: 1; min-width: 0; margin-right: 16rpx; font-size: 28rpx; font-weight: 600;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.subline { margin-top: 16rpx; font-size: 24rpx; }
+.subline .muted { flex: 1; min-width: 0; margin-right: 20rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.subline .price { flex-shrink: 0; }
+.price { font-size: 30rpx; }
+.tag { flex-shrink: 0; font-size: 22rpx; border-radius: 8rpx; padding: 2rpx 14rpx; }
+.st-pending { color: var(--warning); background: rgba(255,195,0,.15); }
+.st-making { color: var(--primary); background: var(--primary-weak); }
+.st-ready { color: var(--success); background: rgba(7,193,96,.12); }
+.st-done { color: var(--text-weak); background: var(--line); }
+.st-cancelled { color: #999; background: var(--line); }

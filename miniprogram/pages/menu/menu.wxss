@@ -1,0 +1,68 @@
+/* 菜单页：整页 flex 纵向布局，左右两栏各自用 scroll-view 内部滚动，页面本身不滚动。
+   height: 100vh 即页面可视区高度（不含原生导航栏/tabBar，由框架保证）；
+   底部 padding 给固定购物车条预留空间，随 rpx 缩放，不写死 px。 */
+.page { display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; padding-bottom: 120rpx; }
+
+.store-card { margin: 20rpx; padding: 30rpx; border-radius: 20rpx; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), #ff915f); color: #fff; }
+.store-name { font-size: 38rpx; font-weight: 700; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.store-time { margin-top: 8rpx; font-size: 26rpx; opacity: .9; }
+.notice { margin-top: 14rpx; font-size: 24rpx; background: rgba(255,255,255,.22); border-radius: 10rpx; padding: 10rpx 18rpx;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; word-break: break-all; }
+
+.menu-body { flex: 1; min-height: 0; display: flex; }
+.sidebar { width: 180rpx; height: 100%; background: #fbfbfc; flex-shrink: 0; }
+.cat-item { padding: 30rpx 12rpx; text-align: center; font-size: 26rpx; color: var(--text-weak); position: relative; line-height: 1.4; word-break: break-all; }
+.cat-item.active { color: var(--primary); font-weight: 600; background: #fff; }
+.cat-item.active::before { content: ''; position: absolute; left: 0; top: 30%; bottom: 30%; width: 6rpx; border-radius: 4rpx; background: var(--primary); }
+
+.dish-list { flex: 1; min-width: 0; height: 100%; padding: 8rpx 20rpx 20rpx; }
+.dish-card { display: flex; background: var(--card); border-radius: 16rpx; padding: 20rpx; margin-bottom: 16rpx; }
+.dish-img { width: 150rpx; height: 150rpx; border-radius: 12rpx; flex-shrink: 0; }
+.dish-img.placeholder { background: var(--primary-weak); }
+.dish-info { flex: 1; min-width: 0; margin-left: 20rpx; display: flex; flex-direction: column; }
+.dish-name { font-size: 30rpx; font-weight: 600; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; word-break: break-all; }
+.dish-desc { font-size: 24rpx; margin-top: 6rpx; }
+.stock { font-size: 22rpx; margin-top: 4rpx; }
+.spec-tag { align-self: flex-start; font-size: 22rpx; color: var(--primary); background: var(--primary-weak); border-radius: 8rpx; padding: 2rpx 12rpx; margin-top: 8rpx; }
+.foot { margin-top: auto; padding-top: 10rpx; }
+
+.stepper { display: flex; align-items: center; }
+.step-btn { width: 46rpx; height: 46rpx; display: flex; align-items: center; justify-content: center; line-height: 1; text-align: center; border: 2rpx solid var(--primary); color: var(--primary); border-radius: 50%; font-size: 34rpx; flex-shrink: 0; }
+.step-btn.plus { background: var(--primary); color: #fff; }
+.qty { margin: 0 18rpx; font-size: 28rpx; min-width: 30rpx; text-align: center; }
+
+/* 购物车条固定在页面底部。menu 是原生 tabBar 页面，bottom:0 就落在 tabBar 上方，
+   这里不能再加 safe-area-inset-bottom，否则会和 tabBar 之间多出一条 home 条高度的空白。 */
+.cart-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--card);
+  padding: 16rpx 24rpx;
+  display: flex; align-items: center; box-shadow: 0 -6rpx 20rpx rgba(0,0,0,.08); }
+.cart-left { position: relative; width: 150rpx; font-size: 26rpx; }
+/* 角标原来 left:-40rpx，小屏上会跑到屏幕外被裁掉，改成贴住「购物车」文字左上角 */
+.cart-badge { position: absolute; left: 0; top: -28rpx; min-width: 36rpx; height: 36rpx; line-height: 36rpx; padding: 0 8rpx;
+  border-radius: 20rpx; background: var(--primary); color: #fff; font-size: 22rpx; text-align: center; white-space: nowrap; }
+.cart-amount { flex: 1; text-align: right; padding-right: 24rpx; }
+.cart-amount .price { font-size: 34rpx; }
+.go-btn { background: var(--primary); color: #fff; border-radius: 999rpx; padding: 18rpx 52rpx; font-size: 30rpx; line-height: 1.2; white-space: nowrap; flex-shrink: 0; }
+.go-btn::after { border: none; }
+.go-btn[disabled] { opacity: .5; }
+
+.empty { text-align: center; padding: 100rpx 0; }
+
+/* 弹层 */
+.mask { position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); z-index: 90; }
+/* 弹层同样位于原生 tabBar 上方，不加 safe-area；
+   小屏（iPhone SE）/横屏 + 多个规格时内容会超过一屏，这里限制高度并在弹层内部滚动，
+   保证底部「加入购物车」按钮始终可以滑动到、可点击。 */
+.popup { position: fixed; left: 0; right: 0; bottom: 0; z-index: 100; background: var(--card);
+  border-radius: 28rpx 28rpx 0 0; padding: 28rpx 28rpx 40rpx; max-height: 84vh; overflow-y: auto;
+  -webkit-overflow-scrolling: touch; }
+.pop-head { margin-bottom: 6rpx; }
+.popup-name { flex: 1; min-width: 0; margin-right: 20rpx; font-size: 32rpx; font-weight: 600; word-break: break-all; }
+.popup-price { flex-shrink: 0; font-size: 32rpx; }
+.pop-sec { margin-top: 26rpx; }
+.sec-title { font-size: 26rpx; color: var(--text-weak); margin-bottom: 16rpx; }
+.pill-row { display: flex; flex-wrap: wrap; }
+.pill { max-width: 100%; font-size: 26rpx; border: 2rpx solid var(--line); border-radius: 999rpx; padding: 10rpx 26rpx; margin: 0 16rpx 16rpx 0; color: var(--text); word-break: break-all; }
+.pill.picked { border-color: var(--primary); color: var(--primary); background: var(--primary-weak); }
+.confirm-btn { margin-top: 30rpx; }

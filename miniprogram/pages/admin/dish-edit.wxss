@@ -1,0 +1,36 @@
+.form-page { padding-bottom: 180rpx; }
+
+.block { margin-top: 0; }
+.block-title { font-size: 30rpx; font-weight: 600; margin-bottom: 16rpx; }
+.form-row { display: flex; align-items: center; padding: 14rpx 0; border-bottom: 2rpx solid var(--line); }
+.form-row:last-child { border-bottom: none; }
+.label { width: 150rpx; color: var(--text-weak); flex-shrink: 0; font-size: 27rpx; }
+.req { color: var(--danger); }
+.input { flex: 1; text-align: right; font-size: 28rpx; height: 72rpx; line-height: 72rpx; }
+.picker { flex: 1; text-align: right; }
+.picker-view { text-align: right; font-size: 28rpx; color: var(--text); }
+.picker-view:empty { color: var(--text-weak); }
+
+.add-link { color: var(--primary); font-size: 26rpx; font-weight: 400; }
+.kv-line { display: flex; align-items: center; gap: 16rpx; padding: 12rpx 0; }
+.kv-input { background: var(--bg); border-radius: 10rpx; height: 80rpx; line-height: 80rpx; padding: 0 20rpx; font-size: 28rpx; box-sizing: border-box; }
+.kv-input.name { flex: 1; }
+.kv-input.price { width: 180rpx; text-align: center; }
+.del { color: var(--danger); font-size: 40rpx; padding: 0 8rpx; }
+
+.img-row { display: flex; }
+.img-preview { position: relative; width: 180rpx; height: 180rpx; }
+.img-preview image { width: 180rpx; height: 180rpx; border-radius: 12rpx; }
+.img-del { position: absolute; top: -14rpx; right: -14rpx; width: 40rpx; height: 40rpx; line-height: 38rpx; text-align: center; border-radius: 50%; background: var(--danger); color: #fff; font-size: 30rpx; }
+.img-empty { width: 180rpx; height: 180rpx; border: 2rpx dashed var(--line); border-radius: 12rpx; display: flex; align-items: center; justify-content: center; color: var(--text-weak); font-size: 26rpx; }
+.img-hint { margin-top: 12rpx; font-size: 23rpx; }
+
+.save-bar { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; padding: 16rpx 20rpx calc(16rpx + env(safe-area-inset-bottom)); box-shadow: 0 -4rpx 12rpx rgba(0,0,0,0.04); }
+.save-btn { width: 100%; margin: 0; }
+
+/* 图片上传中 */
+.img-preview.is-uploading image { opacity: .45; }
+.img-mask { position: absolute; left: 0; top: 0; right: 0; bottom: 0; border-radius: 12rpx;
+  background: rgba(0, 0, 0, .35); color: #fff; font-size: 24rpx;
+  display: flex; align-items: center; justify-content: center; }
+.img-empty.is-uploading { color: var(--primary); border-color: var(--primary); }

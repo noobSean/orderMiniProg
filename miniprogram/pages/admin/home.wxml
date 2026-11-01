@@ -1,0 +1,40 @@
+<view class="page admin-page" wx:if="{{ready}}">
+  <!-- 今日概览 -->
+  <view class="card today">
+    <view class="section-title">今日概览</view>
+    <view class="stat-grid">
+      <view class="stat-item">
+        <view class="stat-num">{{stats.orderCount}}</view>
+        <view class="stat-label muted">订单数</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-num price">¥{{stats.revenueText}}</view>
+        <view class="stat-label muted">营业额</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-num">{{stats.pickupCount}}</view>
+        <view class="stat-label muted">自取</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-num">{{stats.deliveryCount}}</view>
+        <view class="stat-label muted">配送</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能入口 -->
+  <view class="entry-title muted">功能入口</view>
+  <view class="card entry-grid">
+    <view class="entry-item" wx:for="{{entries}}" wx:key="url" data-url="{{item.url}}" bindtap="go">
+      <view class="entry-icon">{{item.icon}}</view>
+      <view class="entry-name">{{item.name}}</view>
+    </view>
+  </view>
+
+  <!-- 退出管理登录 -->
+  <view class="logout-bar">
+    <button class="btn-plain logout-btn" bindtap="onLogout">退出管理登录</button>
+  </view>
+
+  <view class="safe-bottom" />
+</view>

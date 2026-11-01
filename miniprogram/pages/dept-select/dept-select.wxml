@@ -1,0 +1,21 @@
+<view class="page">
+  <view class="search-bar">
+    <input class="search-input" placeholder="搜索科室名称 / 拼音首字母（如 内科、NK）" value="{{keyword}}" bindinput="onSearch" confirm-type="search" cursor-spacing="100" />
+  </view>
+
+  <view wx:if="{{loading}}" class="tip muted">加载中…</view>
+  <block wx:else>
+    <view wx:if="{{!groups.length}}" class="tip muted">没有匹配的科室</view>
+    <scroll-view scroll-y class="list-scroll">
+      <view class="group" wx:for="{{groups}}" wx:key="rootName" wx:for-item="g">
+        <view class="group-title muted">{{g.rootName}}</view>
+        <view class="dept-item" wx:for="{{g.items}}" wx:key="id" wx:for-item="d"
+              data-id="{{d.id}}" data-code="{{d.code}}" data-name="{{d.name}}" data-root="{{g.rootName}}" bindtap="pick">
+          <text class="dept-name">{{d.name}}</text>
+          <text class="dept-py muted">{{d.pinyin}}</text>
+        </view>
+      </view>
+      <view class="safe-bottom" />
+    </scroll-view>
+  </block>
+</view>

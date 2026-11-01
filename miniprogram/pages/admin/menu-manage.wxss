@@ -1,0 +1,29 @@
+.add-dish-bar { padding: 20rpx; }
+.add-btn { width: 100%; margin: 0; }
+
+/* 分类 */
+.tabs { white-space: nowrap; background: #fff; position: sticky; top: 0; z-index: 5; display: flex; align-items: center; }
+.tab { display: inline-block; padding: 24rpx 28rpx; font-size: 28rpx; color: var(--text-weak); flex-shrink: 0; }
+.tab.active { color: var(--primary); font-weight: 600; position: relative; }
+.tab.active::after { content: ''; position: absolute; left: 30%; right: 30%; bottom: 8rpx; height: 6rpx; border-radius: 6rpx; background: var(--primary); }
+.cat-ops { font-size: 24rpx; color: var(--text-weak); margin-left: 8rpx; }
+.cat-ops.del { color: var(--danger); }
+.cat-add { flex-shrink: 0; padding: 24rpx 28rpx; color: var(--primary); font-size: 34rpx; }
+
+/* 菜品卡片 */
+.dish-card { }
+.dish-thumb { width: 96rpx; height: 96rpx; border-radius: 10rpx; margin-right: 18rpx; flex-shrink: 0; background: var(--primary-weak); }
+.dish-main { flex: 1; min-width: 0; }
+.dish-name { font-size: 30rpx; font-weight: 600; min-width: 0; }
+.avail { font-size: 20rpx; }
+.avail.on { background: var(--primary-weak); color: var(--primary); }
+.avail.off { background: #eef0f3; color: var(--text-weak); }
+.dish-sub { margin-top: 12rpx; font-size: 25rpx; }
+.dish-ops { gap: 12rpx; flex-shrink: 0; }
+.mini-btn { height: 64rpx; line-height: 64rpx; font-size: 26rpx; padding: 0 28rpx; border-radius: 999rpx; margin: 0; box-sizing: border-box; }
+.mini-btn.primary { background: var(--primary); color: #fff; }
+.mini-btn.plain { background: #fff; color: var(--primary); border: 2rpx solid var(--primary); line-height: 60rpx; }
+
+.mini-btn::after { border: none; }
+
+.empty { text-align: center; padding: 120rpx 0; }
