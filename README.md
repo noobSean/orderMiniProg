@@ -340,7 +340,7 @@ await upload.remove(fileID);
 
 ## 十一、测试与质量
 
-- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，389 个用例）
+- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，390 个用例）
   - 云函数：`npm run test:cloud`（内存 mock 微信云 SDK，覆盖 17 个云函数）
   - 小程序端工具：`npm run test:client`
   - 静态/安全/体积/兼容：`npm run test:static`
@@ -509,6 +509,14 @@ await upload.remove(fileID);
 > 2. 售罄标记：按东八区自然日自动失效，第二天不用触发器也会恢复在售；
 > 3. 配触发器只是让“没人打开后台时”也能自动清理超时订单，配不好不影响营业。
 
+
+#### 管理端「订单处理」空白 / 刷不出数据怎么办？
+
+1. **先重新登录管理后台**：管理会话 12 小时过期，或修改密码后所有旧会话失效；新版页面检测到服务端会话失效会自动跳登录页。
+2. 看云函数 **orderAdmin 日志**：搜索 `[orderAdmin] list`，会打印 status/count/autoCancelled；count=0 说明查询没匹配到数据。
+3. 检查云开发数据库 orders：集合里是否有订单、createdAt 是否为日期类型；管理端现在默认查最近 **30 天**（最多 100 条），更早订单不会显示。
+4. 核对小程序 envId 与云函数所在环境是否一致（多环境容易看错）。
+5. 页面加载失败现在会显示错误原因和「重新加载」按钮；仍空白请把 orderAdmin 日志发我。
 
 #### 提交订单提示 `document.get:fail ... does not exist` 怎么办？
 

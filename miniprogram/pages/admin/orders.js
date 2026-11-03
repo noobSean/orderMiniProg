@@ -43,8 +43,28 @@ Page({
     if (!adminAuth.ensure()) return;
     this.setData({ ready: true });
     this._knownIds = null;
-    this.load();
+    this.verifySessionAndLoad();
     this.startPoll();
+  },
+
+  // 服务端会话校验：本地 token 看似有效但云端会话可能已失效（改密/过期/被清理），先验证再拉数据
+  async verifySessionAndLoad() {
+    try {
+      const v = await api.adminVerify();
+      if (!v || v.valid !== true) {
+        adminAuth.clear();
+        wx.redirectTo({ url: adminAuth.loginUrl('/pages/admin/orders') });
+        return;
+      }
+    } catch (err) {
+      if (err && err.code === 'NEED_ADMIN_LOGIN') {
+        adminAuth.clear();
+        wx.redirectTo({ url: adminAuth.loginUrl('/pages/admin/orders') });
+        return;
+      }
+      // 网络异常时仍尝试加载列表，列表错误会显示重试入口
+    }
+    this.load();
   },
 
   onHide() { this.stopPoll(); },
@@ -70,12 +90,18 @@ Page({
     try {
       const isUnpaidTab = this.data.activeTab === 'unpaid';
       const status = (this.data.activeTab && !isUnpaidTab) ? this.data.activeTab : undefined;
-      const list = await api.adminOrders('list', { status });
+      const list = await api.adminOrders('list', { status, days: 30 });
       let orders = (list || []).map(o => this.normOrder(o));
       if (isUnpaidTab) orders = orders.filter(o => o.paymentUnpaid && o.status !== 'cancelled');
       this.detectNewOrders(orders);
       this.setData({ orders, fetchError: '' });
     } catch (err) {
+      if (err && err.code === 'NEED_ADMIN_LOGIN') {
+        this.stopPoll();
+        adminAuth.clear();
+        wx.redirectTo({ url: adminAuth.loginUrl('/pages/admin/orders') });
+        return;
+      }
       if (!options.silent) {
         this.setData({ fetchError: (err && err.message) || '加载失败' });
         wx.showToast({ title: this.data.fetchError, icon: 'none' });
@@ -146,6 +172,12 @@ Page({
     this.setData({ activeTab: e.currentTarget.dataset.key });
     this._knownIds = null;
     this.load();
+  },
+
+  // 加载失败时手动重试
+  reload() {
+    this.setData({ fetchError: '' });
+    this.verifySessionAndLoad();
   },
 
   onCard(e) {

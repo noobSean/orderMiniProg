@@ -43,8 +43,11 @@
       </view>
     </view>
 
-    <view wx:if="{{!orders.length && !fetching}}" class="empty muted">暂无订单</view>
-    <view wx:if="{{fetchError}}" class="empty muted">{{fetchError}}</view>
+    <view wx:if="{{!orders.length && !fetching && !fetchError}}" class="empty muted">暂无订单</view>
+    <view wx:if="{{fetchError}}" class="empty muted">
+      <view>{{fetchError}}</view>
+      <button class="mini-btn primary retry-btn" bindtap="reload">重新加载</button>
+    </view>
   </view>
   <view class="safe-bottom" />
 </view>

@@ -46,3 +46,6 @@
 .pay-tag.unpaid { color: #fff; background: var(--danger); }
 .pay-tag.paid { color: var(--success); background: rgba(7, 193, 96, 0.08); }
 .mini-btn.pay { color: #fff; background: var(--warning); border: none; }
+
+/* 加载失败重试 */
+.retry-btn { margin: 24rpx auto 0; }

@@ -421,15 +421,22 @@ exports.main = async (event, context) => {
     if (action === 'list') {
       let status = event.status
       if (status === 'cancel') status = 'cancelled' // 兼容前端别名
-      const since = new Date()
-      since.setDate(since.getDate() - 7)
-      let q = { createdAt: _.gte(since) }
+      // days：默认 7 天；传 0 表示不限日期（最多返回 100 条）。管理端现在默认传 30 天，避免测试/历史订单“突然不见”
+      const days = (event && event.days !== undefined) ? Number(event.days) : 7
+      let q = {}
+      if (isFinite(days) && days > 0) {
+        const since = new Date()
+        since.setDate(since.getDate() - days)
+        q.createdAt = _.gte(since)
+      }
       if (status && VALID_STATUS.indexOf(status) !== -1) q.status = status
       const res = await db.collection('orders').where(q).orderBy('createdAt', 'desc').limit(100).get()
       // 惰性兜底：列表查询成功后再清理超时未付款订单（失败不影响本次列表返回）
       let autoCancelled = 0
       try { autoCancelled = await cancelExpiredUnpaidOrders() } catch (e) {}
-      return { ok: true, data: res.data || [], autoCancelled: autoCancelled }
+      const list = res.data || []
+      console.log('[orderAdmin] list', JSON.stringify({ status: status || '', count: list.length, autoCancelled: autoCancelled }))
+      return { ok: true, data: list, autoCancelled: autoCancelled }
     }
     if (action === 'status') {
       const orderId = event.orderId

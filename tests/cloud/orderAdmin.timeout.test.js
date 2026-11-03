@@ -83,3 +83,12 @@ test('orderAdmin/list: 重复刷新幂等，不会重复回补库存', async () 
   assert.equal(res2.autoCancelled, 0)
   assert.equal(s.doc('dishes', 'dish_1').stock, 12)
 })
+
+test('orderAdmin/list: days=0 时不再限制近 7 天', async () => {
+  const old = Date.now() - 10 * 24 * 60 * 60 * 1000
+  const s = scenario([order('o_old', old, { status: 'done', paymentStatus: 'paid' })])
+  const def = await call(s, { action: 'list' })
+  assert.equal(def.data.length, 0, '默认近 7 天不返回')
+  const all = await call(s, { action: 'list', days: 0 })
+  assert.equal(all.data.length, 1, 'days=0 应返回该订单')
+})
