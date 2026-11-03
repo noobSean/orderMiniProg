@@ -94,6 +94,7 @@ Page({
       let orders = (list || []).map(o => this.normOrder(o));
       if (isUnpaidTab) orders = orders.filter(o => o.paymentUnpaid && o.status !== 'cancelled');
       this.detectNewOrders(orders);
+      console.log('[adminOrders] loaded', orders.length, 'orders')
       this.setData({ orders, fetchError: '' });
     } catch (err) {
       if (err && err.code === 'NEED_ADMIN_LOGIN') {
@@ -178,6 +179,12 @@ Page({
   reload() {
     this.setData({ fetchError: '' });
     this.verifySessionAndLoad();
+  },
+
+  // 页面顶部手动刷新
+  onRefresh() {
+    this._knownIds = null;
+    this.reload();
   },
 
   onCard(e) {
