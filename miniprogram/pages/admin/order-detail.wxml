@@ -14,6 +14,15 @@
       <view class="row head-meta muted"><text>下单时间：{{detail.time}}</text></view>
     </view>
 
+    <!-- 待收款提示（线下 POS 收款后手动标记） -->
+    <view wx:if="{{detail.paymentUnpaid && detail.status!=='cancel'}}" class="card pay-card">
+      <view class="pay-copy">
+        <view class="pay-title">待收款</view>
+        <view class="muted pay-desc">员工卡 POS 收款后，点右侧按钮标记</view>
+      </view>
+      <button class="btn-pay" bindtap="onPay">标记已收款</button>
+    </view>
+
     <!-- 买家信息 -->
     <view class="card block">
       <view class="block-title">买家信息</view>
@@ -72,15 +81,11 @@
       </view>
     </view>
 
-    <!-- 操作按钮（按当前状态） -->
-    <view wx:if="{{actions.length}}" class="action-bar">
-      <button wx:for="{{actions}}" wx:key="key"
-              class="act {{item.type==='danger' ? 'danger' : (item.type==='plain' ? 'plain' : (item.type==='pay' ? 'pay' : 'primary'))}}"
-              data-status="{{item.key}}" bindtap="onAction">{{item.text}}</button>
+    <!-- 底部操作：唯一主流程按钮 + 次要的取消文字链 -->
+    <view wx:if="{{primaryAction || canCancel}}" class="action-bar">
+      <text wx:if="{{canCancel}}" class="cancel-link" bindtap="onCancel">取消订单</text>
+      <button wx:if="{{primaryAction}}" class="act primary" data-status="{{primaryAction.key}}" bindtap="onAction">{{primaryAction.text}}</button>
     </view>
-
-    <view class="safe-bottom" />
-    <view class="safe-bottom" />
   </block>
   <view wx:else class="empty muted">未找到订单</view>
 </view>

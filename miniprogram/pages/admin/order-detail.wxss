@@ -1,4 +1,18 @@
-.detail-page { padding-bottom: 180rpx; }
+.detail-page { padding-bottom: 240rpx; }
+
+/* 待收款卡片 */
+.pay-card {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 20rpx; background: #fff7e6; border: 2rpx solid #ffe1a8;
+}
+.pay-copy { flex: 1; min-width: 0; }
+.pay-title { font-size: 30rpx; font-weight: 600; color: #ad6800; }
+.pay-desc { font-size: 24rpx; margin-top: 4rpx; }
+.btn-pay {
+  flex-shrink: 0; margin: 0; padding: 0 30rpx; height: 72rpx; line-height: 72rpx;
+  font-size: 26rpx; color: #fff; background: #d48806; border-radius: 999rpx;
+}
+.btn-pay::after { border: none; }
 
 /* 头部 */
 .head { margin-top: 20rpx; }
@@ -35,16 +49,24 @@
 .hist-time { font-size: 23rpx; margin-top: 2rpx; }
 
 .empty { text-align: center; padding: 120rpx 0; }
+
+
+/* 底部操作栏：左侧取消文字链 + 右侧主流程大按钮 */
 .action-bar {
   position: fixed; left: 0; right: 0; bottom: 0; background: #fff;
-  padding: 16rpx 20rpx calc(16rpx + env(safe-area-inset-bottom));
-  display: flex; gap: 20rpx; box-shadow: 0 -4rpx 12rpx rgba(0,0,0,0.04);
+  padding: 18rpx 24rpx calc(18rpx + env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 24rpx;
+  box-shadow: 0 -6rpx 20rpx rgba(0,0,0,0.06);
 }
-.act { flex: 1; font-size: 30rpx; border-radius: 999rpx; line-height: 2.4; margin: 0; }
+.cancel-link {
+  flex-shrink: 0; color: var(--danger); font-size: 28rpx; padding: 0 8rpx;
+}
+.act {
+  flex: 1; margin: 0; height: 88rpx; line-height: 88rpx;
+  font-size: 30rpx; border-radius: 999rpx;
+}
 .act::after { border: none; }
 .act.primary { background: var(--primary); color: #fff; }
-.act.plain { background: #fff; color: var(--primary); border: 2rpx solid var(--primary); }
-.act.danger { background: var(--danger); color: #fff; }
 
 /* 收款状态 */
 .pay-tag { font-size: 21rpx; padding: 2rpx 10rpx; border-radius: 6rpx; flex-shrink: 0; }

@@ -28,7 +28,8 @@ Page({
     ready: false,
     orderId: '',
     detail: null,
-    actions: [],
+    primaryAction: null,
+    canCancel: false,
     fetching: true
   },
 
@@ -46,7 +47,11 @@ Page({
     this.setData({ fetching: true });
     try {
       const o = await api.orderDetail(this.data.orderId);
-      this.setData({ detail: this.normDetail(o || {}), actions: this.buildActions(o || {}) });
+      this.setData({
+        detail: this.normDetail(o || {}),
+        primaryAction: this.buildPrimaryAction(o || {}),
+        canCancel: this.canCancel(o || {})
+      });
     } catch (err) {
       wx.showToast({ title: (err && err.message) || '加载失败', icon: 'none' });
     } finally {
@@ -112,35 +117,58 @@ Page({
     };
   },
 
-  buildActions(o) {
+  // 底部只放当前状态唯一的“主流程”按钮，避免三个同等权重大按钮堆在底部
+  buildPrimaryAction(o) {
     const st = normStatus(o.status);
     const type = o.type === 'delivery' ? 'delivery' : 'pickup';
-    const A = [];
-    if (o.paymentStatus === 'unpaid' && st !== 'cancelled') {
-      A.push({ key: 'pay', text: '标记已收款', type: 'pay' });
-    }
-    if (st === 'pending') {
-      A.push({ key: 'making', text: '接单', type: 'primary' });
-      A.push({ key: 'cancel', text: '取消', type: 'danger' });
-    } else if (st === 'making') {
-      A.push({ key: 'ready', text: '制作完成', type: 'primary' });
-      if (type === 'delivery') A.push({ key: 'ready', text: '配送', type: 'plain' });
-      A.push({ key: 'cancel', text: '取消', type: 'danger' });
-    } else if (st === 'ready') {
-      A.push({ key: 'done', text: type === 'delivery' ? '完成' : '已取餐', type: 'primary' });
-    }
-    return A;
+    if (st === 'pending') return { key: 'making', text: '接单' };
+    if (st === 'making') return { key: 'ready', text: type === 'delivery' ? '开始配送' : '制作完成' };
+    if (st === 'ready') return { key: 'done', text: type === 'delivery' ? '完成配送' : '已取餐' };
+    return null;
   },
 
-  async onAction(e) {
-    const status = e.currentTarget.dataset.status;
+  // 只有待接/制作中可以取消；取消是次要操作，放在底部左侧文字链
+  canCancel(o) {
+    const st = normStatus(o.status);
+    return st === 'pending' || st === 'making';
+  },
+
+  // 标记线下收款（员工卡 POS 收款后）
+  async onPay() {
     wx.showLoading({ title: '处理中' });
     try {
-      if (status === 'pay') {
-        await api.adminOrders('pay', { orderId: this.data.orderId });
-      } else {
-        await api.adminOrders('status', { orderId: this.data.orderId, status });
+      await api.adminOrders('pay', { orderId: this.data.orderId });
+      wx.showToast({ title: '已标记收款', icon: 'success' });
+      this.load();
+    } catch (err) {
+      wx.showToast({ title: (err && err.message) || '操作失败', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+
+  onAction(e) {
+    this.updateStatus(e.currentTarget.dataset.status);
+  },
+
+  // 取消前二次确认，避免误触（取消会回补库存）
+  onCancel() {
+    wx.showModal({
+      title: '取消订单',
+      content: '取消后不可恢复，库存会自动回补。确定取消该订单？',
+      confirmColor: '#fa5151',
+      confirmText: '取消订单',
+      cancelText: '再想想',
+      success: (res) => {
+        if (res.confirm) this.updateStatus('cancel');
       }
+    });
+  },
+
+  async updateStatus(status) {
+    wx.showLoading({ title: '处理中' });
+    try {
+      await api.adminOrders('status', { orderId: this.data.orderId, status });
       wx.showToast({ title: '已更新', icon: 'success' });
       this.load();
     } catch (err) {

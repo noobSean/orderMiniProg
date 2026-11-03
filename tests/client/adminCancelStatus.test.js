@@ -89,5 +89,24 @@ test('管理端订单详情：cancelled 显示「已取消」，操作按钮为�
   assert.equal(detail.status, 'cancel');
   assert.equal(detail.statusLabel, '已取消');
   assert.equal(detail.statusClass, 'cancel');
-  assert.deepEqual(page.buildActions(CANCELLED_ORDER), []);
+  assert.equal(page.buildPrimaryAction(CANCELLED_ORDER), null);
+  assert.equal(page.canCancel(CANCELLED_ORDER), false);
+});
+
+
+test('管理端订单详情：底部只保留一个主流程按钮，取消为次要操作', () => {
+  const page = instantiate(loadPage('admin/order-detail.js'));
+  const pending = Object.assign({}, CANCELLED_ORDER, { status: 'pending' });
+  assert.deepEqual(page.buildPrimaryAction(pending), { key: 'making', text: '接单' });
+  assert.equal(page.canCancel(pending), true);
+
+  const makingPickup = Object.assign({}, CANCELLED_ORDER, { status: 'making', type: 'pickup' });
+  assert.deepEqual(page.buildPrimaryAction(makingPickup), { key: 'ready', text: '制作完成' });
+
+  const makingDelivery = Object.assign({}, CANCELLED_ORDER, { status: 'making', type: 'delivery' });
+  assert.deepEqual(page.buildPrimaryAction(makingDelivery), { key: 'ready', text: '开始配送' });
+
+  const readyPickup = Object.assign({}, CANCELLED_ORDER, { status: 'ready', type: 'pickup' });
+  assert.deepEqual(page.buildPrimaryAction(readyPickup), { key: 'done', text: '已取餐' });
+  assert.equal(page.canCancel(readyPickup), false);
 });
