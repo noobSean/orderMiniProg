@@ -350,6 +350,7 @@ async function cancelExpiredUnpaidOrders() {
       console.log('[orderAdmin] auto cancel failed', (e && e.message) || '')
     }
   }
+  if (cancelled > 0) console.log('[orderAdmin] auto-cancelled unpaid orders', JSON.stringify({ cancelled: cancelled, timeoutMin: timeoutMin }))
   return cancelled
 }
 

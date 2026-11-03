@@ -83,9 +83,13 @@ exports.main = async (event, context) => {
     const trigger = (event && (event.TriggerName || event.triggerName)) || ''
     // 兼容定时触发器（TriggerName）与控制台手动测试（action）
     if (trigger === 'dailySoldOutReset' || (event && event.action === 'dailySoldOutReset')) {
-      return { ok: true, data: Object.assign({ task: 'dailySoldOutReset' }, await resetSoldOut()) }
+      const r = await resetSoldOut()
+      console.log('[orderTimeout] dailySoldOutReset done', JSON.stringify(r))
+      return { ok: true, data: Object.assign({ task: 'dailySoldOutReset' }, r) }
     }
-    return { ok: true, data: Object.assign({ task: 'unpaidTimeout' }, await cancelExpiredUnpaid()) }
+    const r2 = await cancelExpiredUnpaid()
+    console.log('[orderTimeout] unpaidTimeout done', JSON.stringify(r2))
+    return { ok: true, data: Object.assign({ task: 'unpaidTimeout' }, r2) }
   } catch (e) {
     return { ok: false, message: (e && e.message) || '定时任务失败' }
   }
