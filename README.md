@@ -340,7 +340,7 @@ await upload.remove(fileID);
 
 ## 十一、测试与质量
 
-- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，390 个用例）
+- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，392 个用例）
   - 云函数：`npm run test:cloud`（内存 mock 微信云 SDK，覆盖 17 个云函数）
   - 小程序端工具：`npm run test:client`
   - 静态/安全/体积/兼容：`npm run test:static`

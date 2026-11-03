@@ -10,6 +10,9 @@ function money(n) { return (Number(n) || 0).toFixed(2); }
 function normStatus(s) {
   if (s == null) return 'pending';
   const str = String(s).toLowerCase();
+  // 服务端取消态是 cancelled（英文），管理端展示键是 cancel；必须做别名归一化，
+  // 否则 cancelled 会被当成未知状态落到 pending，订单看起来“没更新”。
+  if (str === 'cancelled' || str === 'canceled' || str === 'cancel') return 'cancel';
   if (STATUS[str]) return str;
   for (const k in STATUS) if (STATUS[k] === String(s)) return k;
   return 'pending';
