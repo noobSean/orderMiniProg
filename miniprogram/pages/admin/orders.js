@@ -95,7 +95,7 @@ Page({
       const status = (this.data.activeTab && !isUnpaidTab) ? this.data.activeTab : undefined;
       const list = await api.adminOrders('list', { status, days: 30 });
       let orders = (list || []).map(o => this.normOrder(o));
-      if (isUnpaidTab) orders = orders.filter(o => o.paymentUnpaid && o.status !== 'cancelled');
+      if (isUnpaidTab) orders = orders.filter(o => o.paymentUnpaid && o.status !== 'cancel');
       this.detectNewOrders(orders);
       console.log('[adminOrders] loaded', orders.length, 'orders')
       this.setData({ orders, fetchError: '' });
@@ -163,7 +163,7 @@ Page({
       paymentUnpaid: paymentUnpaid,
       paymentLabel: paymentUnpaid ? '待收款' : '已收款',
       time: fmtTime(o.createTime || o.createdAt || o.time || o.createDate),
-      showPay: paymentUnpaid && st !== 'cancelled',
+      showPay: paymentUnpaid && st !== 'cancel',
       showAccept: st === 'pending',
       showMake: st === 'making',
       showDeliver: st === 'making' && type === 'delivery',

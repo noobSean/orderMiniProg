@@ -110,3 +110,15 @@ test('管理端订单详情：底部只保留一个主流程按钮，取消为�
   assert.deepEqual(page.buildPrimaryAction(readyPickup), { key: 'done', text: '已取餐' });
   assert.equal(page.canCancel(readyPickup), false);
 });
+
+
+test('管理端：已取消且未收款的订单不再出现「收款」按钮，也不进待收款 Tab', () => {
+  const page = instantiate(loadPage('admin/orders.js'));
+  const cancelledUnpaid = Object.assign({}, CANCELLED_ORDER, { paymentStatus: 'unpaid' });
+  const o = page.normOrder(cancelledUnpaid);
+  assert.equal(o.status, 'cancel');
+  assert.equal(o.paymentUnpaid, true);
+  assert.equal(o.showPay, false, '已取消订单不允许再收款');
+  assert.equal(o.showAccept, false);
+  assert.equal(o.showCancel, false);
+});
