@@ -123,32 +123,44 @@ Page({
     const type = o.type === 'delivery' ? 'delivery' : 'pickup';
     if (st === 'pending') return { key: 'making', text: '接单' };
     if (st === 'making') return { key: 'ready', text: type === 'delivery' ? '开始配送' : '制作完成' };
-    if (st === 'ready') return { key: 'done', text: type === 'delivery' ? '完成配送' : '已取餐' };
+    if (st === 'ready') {
+      // 到店取餐/配送时先收款再完成：未收款用「收款并交付」，已收款才是「已取餐」
+      if (o.paymentStatus === 'unpaid') {
+        return { key: 'checkout', text: type === 'delivery' ? '收款并完成配送' : '收款并交付' };
+      }
+      return { key: 'done', text: type === 'delivery' ? '完成配送' : '已取餐' };
+    }
     return null;
   },
 
   // 只有待接/制作中可以取消；取消是次要操作，放在底部左侧文字链
   canCancel(o) {
     const st = normStatus(o.status);
-    return st === 'pending' || st === 'making';
+    // 待取餐也允许取消：员工一直不来时释放库存，避免爽约单占库存
+    return st === 'pending' || st === 'making' || st === 'ready';
   },
 
-  // 标记线下收款（员工卡 POS 收款后）
-  async onPay() {
+  onAction(e) {
+    const key = e.currentTarget.dataset.status;
+    if (key === 'checkout') {
+      this.checkout();
+      return;
+    }
+    this.updateStatus(key);
+  },
+
+  // 到店交付：一次完成「收款 + 完成 + 取餐核销」
+  async checkout() {
     wx.showLoading({ title: '处理中' });
     try {
-      await api.adminOrders('pay', { orderId: this.data.orderId });
-      wx.showToast({ title: '已标记收款', icon: 'success' });
+      await api.adminOrders('checkout', { orderId: this.data.orderId });
+      wx.showToast({ title: '已收款并完成', icon: 'success' });
       this.load();
     } catch (err) {
       wx.showToast({ title: (err && err.message) || '操作失败', icon: 'none' });
     } finally {
       wx.hideLoading();
     }
-  },
-
-  onAction(e) {
-    this.updateStatus(e.currentTarget.dataset.status);
   },
 
   // 取消前二次确认，避免误触（取消会回补库存）

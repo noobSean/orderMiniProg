@@ -8,11 +8,6 @@
 .pay-copy { flex: 1; min-width: 0; }
 .pay-title { font-size: 30rpx; font-weight: 600; color: #ad6800; }
 .pay-desc { font-size: 24rpx; margin-top: 4rpx; }
-.btn-pay {
-  flex-shrink: 0; margin: 0; padding: 0 30rpx; height: 72rpx; line-height: 72rpx;
-  font-size: 26rpx; color: #fff; background: #d48806; border-radius: 999rpx;
-}
-.btn-pay::after { border: none; }
 
 /* 头部 */
 .head { margin-top: 20rpx; }
@@ -72,4 +67,3 @@
 .pay-tag { font-size: 21rpx; padding: 2rpx 10rpx; border-radius: 6rpx; flex-shrink: 0; }
 .pay-tag.unpaid { color: #fff; background: var(--danger); }
 .pay-tag.paid { color: var(--success); background: rgba(7, 193, 96, 0.08); }
-.act.pay { background: var(--warning); color: #fff; }

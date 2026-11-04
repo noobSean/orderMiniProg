@@ -76,7 +76,7 @@ test('orderAdmin/pay: 已取消订单不能收款；缺少 orderId 报错', asyn
 })
 
 test('orderAdmin/status: 自取订单 done 记录取餐核销时间 pickedUpAt', async () => {
-  const s = scenario([order('o1', 'ready', 'pickup')])
+  const s = scenario([order('o1', 'ready', 'pickup', { paymentStatus: 'paid' })])
   const res = await call(s, { action: 'status', orderId: 'o1', status: 'done' })
   assert.equal(res.ok, true)
   const o = s.doc('orders', 'o1')
@@ -85,7 +85,7 @@ test('orderAdmin/status: 自取订单 done 记录取餐核销时间 pickedUpAt',
 })
 
 test('orderAdmin/status: 配送订单 done 不写 pickedUpAt', async () => {
-  const s = scenario([order('o1', 'ready', 'delivery')])
+  const s = scenario([order('o1', 'ready', 'delivery', { paymentStatus: 'paid' })])
   await call(s, { action: 'status', orderId: 'o1', status: 'done' })
   const o = s.doc('orders', 'o1')
   assert.equal(o.status, 'done')

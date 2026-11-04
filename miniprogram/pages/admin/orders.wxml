@@ -38,10 +38,9 @@
       </view>
 
       <view class="actions">
-        <button wx:if="{{item.showPay}}" class="mini-btn pay" data-id="{{item._id}}" catchtap="onPay">收款</button>
+        <button wx:if="{{item.showCheckout}}" class="mini-btn pay" data-id="{{item._id}}" catchtap="onCheckout">{{item.checkoutText}}</button>
         <button wx:if="{{item.showAccept}}" class="mini-btn primary" data-id="{{item._id}}" data-status="making" catchtap="onAction">接单</button>
         <button wx:if="{{item.showMake}}" class="mini-btn primary" data-id="{{item._id}}" data-status="ready" catchtap="onAction">制作完成</button>
-        <button wx:if="{{item.showDeliver}}" class="mini-btn plain" data-id="{{item._id}}" data-status="ready" catchtap="onAction">配送</button>
         <button wx:if="{{item.showDone}}" class="mini-btn primary" data-id="{{item._id}}" data-status="done" catchtap="onAction">{{item.doneText}}</button>
         <button wx:if="{{item.showCancel}}" class="mini-btn danger" data-id="{{item._id}}" data-status="cancel" catchtap="onAction">取消</button>
       </view>

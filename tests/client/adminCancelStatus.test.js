@@ -79,7 +79,8 @@ test('管理端订单列表：cancelled 归一化为「已取消」，不再显�
   assert.equal(o.statusLabel, '已取消');
   assert.equal(o.showAccept, false);
   assert.equal(o.showCancel, false);
-  assert.equal(o.showPay, false);
+  assert.equal(o.showCheckout, false);
+  assert.equal(o.showDone, false);
   assert.match(o.time, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
 });
 
@@ -106,9 +107,20 @@ test('管理端订单详情：底部只保留一个主流程按钮，取消为�
   const makingDelivery = Object.assign({}, CANCELLED_ORDER, { status: 'making', type: 'delivery' });
   assert.deepEqual(page.buildPrimaryAction(makingDelivery), { key: 'ready', text: '开始配送' });
 
-  const readyPickup = Object.assign({}, CANCELLED_ORDER, { status: 'ready', type: 'pickup' });
-  assert.deepEqual(page.buildPrimaryAction(readyPickup), { key: 'done', text: '已取餐' });
-  assert.equal(page.canCancel(readyPickup), false);
+  // 已收款的待取餐：主按钮「已取餐」
+  const readyPaid = Object.assign({}, CANCELLED_ORDER, { status: 'ready', type: 'pickup', paymentStatus: 'paid' });
+  assert.deepEqual(page.buildPrimaryAction(readyPaid), { key: 'done', text: '已取餐' });
+  assert.equal(page.canCancel(readyPaid), true);
+
+  // 未收款的待取餐：主按钮「收款并交付」，交付时一并收款
+  const readyUnpaid = Object.assign({}, CANCELLED_ORDER, { status: 'ready', type: 'pickup', paymentStatus: 'unpaid' });
+  assert.deepEqual(page.buildPrimaryAction(readyUnpaid), { key: 'checkout', text: '收款并交付' });
+
+  // 配送单：未收款「收款并完成配送」，已收款「完成配送」
+  const readyDeliveryUnpaid = Object.assign({}, CANCELLED_ORDER, { status: 'ready', type: 'delivery', paymentStatus: 'unpaid' });
+  assert.deepEqual(page.buildPrimaryAction(readyDeliveryUnpaid), { key: 'checkout', text: '收款并完成配送' });
+  const readyDeliveryPaid = Object.assign({}, CANCELLED_ORDER, { status: 'ready', type: 'delivery', paymentStatus: 'paid' });
+  assert.deepEqual(page.buildPrimaryAction(readyDeliveryPaid), { key: 'done', text: '完成配送' });
 });
 
 
@@ -118,7 +130,9 @@ test('管理端：已取消且未收款的订单不再出现「收款」按钮�
   const o = page.normOrder(cancelledUnpaid);
   assert.equal(o.status, 'cancel');
   assert.equal(o.paymentUnpaid, true);
-  assert.equal(o.showPay, false, '已取消订单不允许再收款');
+  assert.equal(o.showCheckout, false, '已取消订单不允许再交付/收款');
   assert.equal(o.showAccept, false);
   assert.equal(o.showCancel, false);
+  assert.equal(o.showCheckout, false);
+  assert.equal(o.showDone, false);
 });

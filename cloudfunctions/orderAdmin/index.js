@@ -372,7 +372,7 @@ const VALID_STATUS = ['pending', 'making', 'ready', 'done', 'cancelled']
 const TRANSITIONS = {
   pending: ['making', 'cancelled'],
   making: ['ready', 'cancelled'],
-  ready: ['done'],
+  ready: ['done', 'cancelled'],
   done: [],
   cancelled: []
 }
@@ -455,6 +455,10 @@ exports.main = async (event, context) => {
         // 重复提交同一状态：幂等返回，不再追加历史、不再重复发订阅消息
         return { ok: true, data: status, noop: true }
       }
+      // 正常流程：取餐时先收款再完成；未收款禁止直接完成（请用「收款并交付」）
+      if (status === 'done' && order.paymentStatus === 'unpaid') {
+        return { ok: false, code: 'PAYMENT_REQUIRED', message: '请先收款再完成订单，请使用「收款并交付」' }
+      }
       if (!canTransit(order.status, status)) {
         return { ok: false, message: '状态流转不合法：' + order.status + ' -> ' + status }
       }
@@ -481,6 +485,37 @@ exports.main = async (event, context) => {
       }
       return { ok: true, data: status }
     }
+    // 收款并交付：员工到店核对餐品后，一次操作完成「收款 + 完成 + 取餐核销」
+    if (action === 'checkout') {
+      const orderId = event.orderId
+      if (!orderId) return { ok: false, message: '缺少 orderId' }
+      const res = await db.collection('orders').doc(orderId).get()
+      const order = res.data
+      if (!order) return { ok: false, message: '订单不存在' }
+      if (order.status === 'cancelled') return { ok: false, message: '订单已取消，不能交付' }
+      if (order.status !== 'ready') return { ok: false, code: 'BAD_STATUS', message: '当前状态不可交付（需待取餐）' }
+      const history = Array.isArray(order.statusHistory) ? order.statusHistory : []
+      history.push({
+        status: 'done',
+        time: db.serverDate(),
+        note: order.type === 'pickup' ? '已收款并交付' : '已收款并完成配送'
+      })
+      const patch = {
+        status: 'done',
+        paymentStatus: 'paid',
+        paidAt: order.paidAt || db.serverDate(),
+        statusHistory: history,
+        updatedAt: db.serverDate()
+      }
+      if (order.type === 'pickup') patch.pickedUpAt = db.serverDate()
+      await db.collection('orders').doc(orderId).update({ data: patch })
+      // 配送单完成时发送「已送达提醒」（失败不影响交付）
+      if (order.type === 'delivery') {
+        sendDeliveryDoneNotice(order, event.subscribeTemplateIds || {}).catch(function () {})
+      }
+      return { ok: true, data: { status: 'done', paymentStatus: 'paid' } }
+    }
+
     // 线下收款标记：员工在 POS 刷卡后，店员在后台标记已收款（不改变制作状态）
     if (action === 'pay') {
       const orderId = event.orderId

@@ -14,13 +14,12 @@
       <view class="row head-meta muted"><text>下单时间：{{detail.time}}</text></view>
     </view>
 
-    <!-- 待收款提示（线下 POS 收款后手动标记） -->
-    <view wx:if="{{detail.paymentUnpaid && detail.status!=='cancel'}}" class="card pay-card">
+    <!-- 待取餐提示：员工到店核对后，点底部「收款并交付」 -->
+    <view wx:if="{{detail.paymentUnpaid && detail.status==='ready'}}" class="card pay-card">
       <view class="pay-copy">
-        <view class="pay-title">待收款</view>
-        <view class="muted pay-desc">员工卡 POS 收款后，点右侧按钮标记</view>
+        <view class="pay-title">待取餐 · 待收款</view>
+        <view class="muted pay-desc">核对取餐号与餐品后，点击底部「{{detail.type==='delivery' ? '收款并完成配送' : '收款并交付'}}」</view>
       </view>
-      <button class="btn-pay" bindtap="onPay">标记已收款</button>
     </view>
 
     <!-- 买家信息 -->
@@ -64,6 +63,9 @@
     <view class="card block">
       <view class="block-title">其他信息</view>
       <view class="kv"><text class="k">支付状态</text><text class="v">{{detail.paymentLabel}}</text></view>
+      <view class="kv" wx:if="{{detail.paymentUnpaid && detail.status!=='ready' && detail.status!=='cancel'}}">
+        <text class="k">收款提示</text><text class="v muted">员工到店取餐时再收款</text>
+      </view>
       <view class="kv" wx:if="{{detail.paidAt}}"><text class="k">收款时间</text><text class="v">{{detail.paidAt}}</text></view>
       <view class="kv" wx:if="{{detail.pickedUpAt}}"><text class="k">取餐时间</text><text class="v">{{detail.pickedUpAt}}</text></view>
       <view class="kv"><text class="k">备注</text><text class="v">{{detail.note || '无'}}</text></view>

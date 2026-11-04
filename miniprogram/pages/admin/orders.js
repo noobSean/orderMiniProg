@@ -163,11 +163,12 @@ Page({
       paymentUnpaid: paymentUnpaid,
       paymentLabel: paymentUnpaid ? '待收款' : '已收款',
       time: fmtTime(o.createTime || o.createdAt || o.time || o.createDate),
-      showPay: paymentUnpaid && st !== 'cancel',
+      // 收款和交付合并：只有「待取餐且未收款」才显示「收款并交付」
+      showCheckout: st === 'ready' && paymentUnpaid,
+      checkoutText: type === 'delivery' ? '收款并完成' : '收款并交付',
       showAccept: st === 'pending',
       showMake: st === 'making',
-      showDeliver: st === 'making' && type === 'delivery',
-      showDone: st === 'ready',
+      showDone: st === 'ready' && !paymentUnpaid,
       showCancel: st === 'pending' || st === 'making'
     };
   },
@@ -194,14 +195,14 @@ Page({
     wx.navigateTo({ url: '/pages/admin/order-detail?id=' + e.currentTarget.dataset.id });
   },
 
-  // 线下收款：员工卡 POS 刷卡后，店员点「收款」
-  async onPay(e) {
+  // 到店交付：一次完成「收款 + 完成 + 取餐核销」
+  async onCheckout(e) {
     const id = e.currentTarget.dataset.id;
     if (!id) return;
     wx.showLoading({ title: '处理中' });
     try {
-      await api.adminOrders('pay', { orderId: id });
-      wx.showToast({ title: '已标记收款', icon: 'success' });
+      await api.adminOrders('checkout', { orderId: id });
+      wx.showToast({ title: '已收款并完成', icon: 'success' });
       this.load();
     } catch (err) {
       wx.showToast({ title: (err && err.message) || '操作失败', icon: 'none' });
