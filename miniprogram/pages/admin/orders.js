@@ -24,6 +24,11 @@ function fmtTime(v) {
 
 const POLL_MS = 15000;
 
+function pad2(n) { return n < 10 ? '0' + n : String(n); }
+function clockText(d) {
+  return pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+}
+
 Page({
   data: {
     ready: false,
@@ -38,7 +43,9 @@ Page({
     ],
     activeTab: '',
     orders: [],
-    fetching: false
+    fetching: false,
+    refreshing: false,
+    lastRefreshText: ''
   },
 
   onShow() {
@@ -57,17 +64,17 @@ Page({
       if (!v || v.valid !== true) {
         adminAuth.clear();
         wx.redirectTo({ url: adminAuth.loginUrl('/pages/admin/orders') });
-        return;
+        return false;
       }
     } catch (err) {
       if (err && err.code === 'NEED_ADMIN_LOGIN') {
         adminAuth.clear();
         wx.redirectTo({ url: adminAuth.loginUrl('/pages/admin/orders') });
-        return;
+        return false;
       }
       // 网络异常时仍尝试加载列表，列表错误会显示重试入口
     }
-    this.load();
+    return this.load();
   },
 
   onHide() { this.stopPoll(); },
@@ -87,7 +94,7 @@ Page({
 
   async load(opts) {
     const options = opts || {};
-    if (this._loading) return;
+    if (this._loading) return false;
     this._loading = true;
     if (!options.silent) this.setData({ fetching: true, fetchError: '' });
     try {
@@ -98,18 +105,20 @@ Page({
       if (isUnpaidTab) orders = orders.filter(o => o.paymentUnpaid && o.status !== 'cancel');
       this.detectNewOrders(orders);
       console.log('[adminOrders] loaded', orders.length, 'orders')
-      this.setData({ orders, fetchError: '' });
+      this.setData({ orders, fetchError: '', lastRefreshText: '更新于 ' + clockText(new Date()) });
+      return true;
     } catch (err) {
       if (err && err.code === 'NEED_ADMIN_LOGIN') {
         this.stopPoll();
         adminAuth.clear();
         wx.redirectTo({ url: adminAuth.loginUrl('/pages/admin/orders') });
-        return;
+        return false;
       }
       if (!options.silent) {
         this.setData({ fetchError: (err && err.message) || '加载失败' });
         wx.showToast({ title: this.data.fetchError, icon: 'none' });
       }
+      return false;
     } finally {
       this._loading = false;
       if (!options.silent) this.setData({ fetching: false });
@@ -181,14 +190,28 @@ Page({
 
   // 加载失败时手动重试
   reload() {
-    this.setData({ fetchError: '' });
-    this.verifySessionAndLoad();
+    this.onRefresh();
   },
 
-  // 页面顶部手动刷新
-  onRefresh() {
+  // 页面顶部手动刷新：loading + 文案 + 成功 Toast + 更新时间
+  async onRefresh() {
+    if (this.data.refreshing) return;
+    if (this._loading) {
+      wx.showToast({ title: '正在刷新，请稍候', icon: 'none' });
+      return;
+    }
     this._knownIds = null;
-    this.reload();
+    this.setData({ refreshing: true, fetchError: '' });
+    wx.showLoading({ title: '刷新中', mask: true });
+    try {
+      const ok = await this.verifySessionAndLoad();
+      if (ok) {
+        wx.showToast({ title: '已刷新', icon: 'success', duration: 800 });
+      }
+    } finally {
+      wx.hideLoading();
+      this.setData({ refreshing: false });
+    }
   },
 
   onCard(e) {

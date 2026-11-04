@@ -13,7 +13,7 @@
 
 ```
 order_recipe_miniprog/
-├─ project.config.json          # 微信开发者工具工程配置（appid 需替换）
+├─ project.config.json          # 微信开发者工具公共配置（不含 appid；appid 在本地私有配置中）
 ├─ README.md
 ├─ cloudfunctions/              # 云函数（每个函数一个目录）
 │  ├─ login/
@@ -54,7 +54,7 @@ order_recipe_miniprog/
    - 企业内部使用、不收款、无需推送：可用**个人主体**（免费）即可体验整套流程。
    - 若需要**订阅消息**（接单/可取餐推送）或后续上支付，需**企业主体并完成认证**（300 元/年）。MVP 阶段可先不做。
 2. 下载**微信开发者工具**：<https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html>
-3. 获取小程序 **AppID**，填入 `project.config.json` 的 `appid` 字段（替换 `touristappid`）。
+3. 获取小程序 **AppID**，在微信开发者工具「详情 → 基本信息」中填写/选择；工具会自动写入本地 `project.private.config.json`。**不要提交这个文件**（已在 `.gitignore` 中忽略），也不要将 AppID 写回 `project.config.json`。
 
 ---
 
@@ -355,7 +355,7 @@ await upload.remove(fileID);
 
 ## 十一、测试与质量
 
-- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，417 个用例）
+- **自动化测试**：`npm test`（Node.js 内置 test runner，零外部依赖，418 个用例）
   - 云函数：`npm run test:cloud`（内存 mock 微信云 SDK，覆盖 17 个云函数）
   - 小程序端工具：`npm run test:client`
   - 静态/安全/体积/兼容：`npm run test:static`

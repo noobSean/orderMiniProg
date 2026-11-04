@@ -54,4 +54,5 @@
 .tabs-bar { display: flex; align-items: center; background: #fff; position: sticky; top: 0; z-index: 5; }
 .tabs-bar .tabs { flex: 1; min-width: 0; }
 .refresh-link { flex-shrink: 0; padding: 26rpx 28rpx; font-size: 26rpx; color: var(--primary); }
+.refresh-link.refreshing { color: var(--text-weak); }
 .count-bar { padding: 12rpx 28rpx; font-size: 24rpx; }

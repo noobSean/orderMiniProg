@@ -1,7 +1,6 @@
 {
   "miniprogramRoot": "miniprogram/",
   "cloudfunctionRoot": "cloudfunctions/",
-  "appid": "wxa096e2a6df677cc7",
   "compileType": "miniprogram",
   "libVersion": "2.33.0",
   "setting": {

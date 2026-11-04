@@ -5,9 +5,9 @@
       <view wx:for="{{tabs}}" wx:key="key" class="tab {{activeTab===item.key?'active':''}}"
             data-key="{{item.key}}" bindtap="onTab">{{item.label}}</view>
     </scroll-view>
-    <view class="refresh-link" bindtap="onRefresh">刷新</view>
+    <view class="refresh-link {{refreshing ? 'refreshing' : ''}}" bindtap="onRefresh">{{refreshing ? '刷新中…' : '刷新'}}</view>
   </view>
-  <view wx:if="{{orders.length}}" class="count-bar muted">共 {{orders.length}} 个订单</view>
+  <view wx:if="{{orders.length}}" class="count-bar muted">共 {{orders.length}} 个订单<text wx:if="{{lastRefreshText}}"> · {{lastRefreshText}}</text></view>
 
   <view class="list">
     <view wx:for="{{orders}}" wx:key="_id" class="card order-card" data-id="{{item._id}}" bindtap="onCard">
