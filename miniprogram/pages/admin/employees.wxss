@@ -38,7 +38,7 @@
   color: #fff;
   background: var(--primary);
   border-radius: 999rpx;
-}
+text-align: center;}
 .emp-hint {
   padding: 16rpx 30rpx 0;
   font-size: 22rpx;
@@ -83,9 +83,17 @@
   font-size: 22rpx;
 }
 .emp-openid { word-break: break-all; }
+.emp-actions { flex-shrink: 0; margin-left: 20rpx; display: flex; flex-direction: column; align-items: flex-end; gap: 12rpx; }
+.emp-admin-toggle {
+  padding: 10rpx 22rpx;
+  font-size: 24rpx;
+  color: var(--primary);
+  border: 2rpx solid var(--primary);
+  border-radius: 999rpx;
+  white-space: nowrap;
+}
 .emp-release {
   flex-shrink: 0;
-  margin-left: 20rpx;
   padding: 10rpx 26rpx;
   font-size: 26rpx;
   color: var(--danger);

@@ -3,7 +3,7 @@
   <view class="login-hero">
     <view class="logo">🔐</view>
     <view class="hero-title">管理后台</view>
-    <view class="hero-sub">输入管理口令，进入门店管理</view>
+    <view class="hero-sub">仅限已授权的管理员微信，输入口令进入</view>
   </view>
 
   <view class="card login-card">

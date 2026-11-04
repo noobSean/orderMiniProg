@@ -57,8 +57,9 @@
   flex-shrink: 0; color: var(--danger); font-size: 28rpx; padding: 0 8rpx;
 }
 .act {
-  flex: 1; margin: 0; height: 88rpx; line-height: 88rpx;
+  flex: 1; margin: 0; height: 88rpx; line-height: 1; padding: 0 24rpx;
   font-size: 30rpx; border-radius: 999rpx;
+  display: flex; align-items: center; justify-content: center; text-align: center;
 }
 .act::after { border: none; }
 .act.primary { background: var(--primary); color: #fff; }

@@ -6,9 +6,10 @@ const db = cloud.database()
 async function isAdminSession(event) {
   const token = (event && event.adminToken) ? String(event.adminToken) : ''
   if (!token) return false
+  const { OPENID } = cloud.getWXContext()
   try {
     const r = await db.collection('admin_sessions')
-      .where({ token: token, expireAt: db.command.gt(Date.now()) })
+      .where({ token: token, openid: OPENID, expireAt: db.command.gt(Date.now()) })
       .limit(1)
       .get()
     return !!(r.data && r.data.length)

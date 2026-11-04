@@ -1,4 +1,5 @@
 const adminAuth = require('../../utils/adminAuth');
+const api = require('../../utils/api');
 
 Page({
   data: {
@@ -7,12 +8,28 @@ Page({
     loading: true,
     loggingIn: false,
     errorMsg: '',
-    adminSession: false
+    adminSession: false,
+    showAdmin: false,     // 仅管理员微信显示管理入口；首次无管理员时 bootstrap=true 临时显示
+    adminBootstrap: false
   },
 
   onShow() {
     this.setData({ adminSession: adminAuth.isValid() });
     this.loadProfile();
+    this.checkAdminEntry();
+  },
+
+  // 服务端判断当前微信是否为管理员；普通员工/用户看不到管理后台入口
+  checkAdminEntry() {
+    api.adminWhoami().then(r => {
+      this.setData({
+        showAdmin: !!(r && (r.isAdmin || r.bootstrap)),
+        adminBootstrap: !!(r && r.bootstrap)
+      });
+    }).catch(() => {
+      // 查询失败时保守隐藏入口
+      this.setData({ showAdmin: false, adminBootstrap: false });
+    });
   },
 
   onPullDownRefresh() {
@@ -59,6 +76,13 @@ Page({
 
   // 管理后台入口：与员工绑定完全解耦，未登录管理端则先跳到口令登录页
   openAdmin() {
+    // 首次初始化（还没有任何管理员）强制走登录：确保首位管理员被绑定到白名单，
+    // 而不是用旧会话直接进入后台导致 bootstrap 窗口一直存在。
+    if (this.data.adminBootstrap) {
+      adminAuth.clear();
+      wx.navigateTo({ url: adminAuth.loginUrl('/pages/admin/home') });
+      return;
+    }
     if (adminAuth.isValid()) {
       wx.navigateTo({ url: '/pages/admin/home' });
       return;

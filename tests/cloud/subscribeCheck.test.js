@@ -35,7 +35,7 @@ const TEMPLATES = [
 function scenario(opts) {
   const options = opts || {}
   const seed = Object.assign({}, options.seed)
-  seed.admin_sessions = [makeSession({ token: TOKEN, expireAt: Date.now() + 60 * 60 * 1000 })]
+  seed.admin_sessions = [makeSession({ token: TOKEN, openid: OPENID, expireAt: Date.now() + 60 * 60 * 1000 })]
   return createScenario({
     fn: 'subscribeCheck',
     openid: OPENID,
@@ -70,7 +70,7 @@ test('subscribeCheck: 无效 / 过期 adminToken 返回 NEED_ADMIN_LOGIN（已�
   s = createScenario({
     fn: 'subscribeCheck',
     openid: OPENID,
-    seed: { admin_sessions: [makeSession({ token: TOKEN, expireAt: Date.now() - 1 })] },
+    seed: { admin_sessions: [makeSession({ token: TOKEN, openid: OPENID, expireAt: Date.now() - 1 })] },
     templates: TEMPLATES
   })
   res = await s.call({ adminToken: TOKEN })

@@ -6,6 +6,7 @@ const _ = db.command
 // 员工绑定管理（管理端）：list 搜索分页 + release 解绑
 // 鉴权与 cloudfunctions/adminLogin 对齐：adminToken 必须命中 admin_sessions 且未过期。
 const SESSION_COLLECTION = 'admin_sessions'
+const ADMIN_USERS_COLLECTION = 'admin_users'
 const EMPLOYEE_COLLECTION = 'employees'
 const DEFAULT_PAGE_SIZE = 20
 const MAX_PAGE_SIZE = 50
@@ -54,10 +55,11 @@ function escapeRegExp(s) {
 async function verifyAdmin(event) {
   const ev = event || {}
   const token = (ev.adminToken === undefined || ev.adminToken === null) ? '' : String(ev.adminToken).trim()
+  const { OPENID } = cloud.getWXContext()
   if (!token) return null
   try {
     const r = await db.collection(SESSION_COLLECTION)
-      .where({ token: token, expireAt: _.gt(Date.now()) })
+      .where({ token: token, openid: OPENID, expireAt: _.gt(Date.now()) })
       .limit(1)
       .get()
     return (r && r.data && r.data[0]) || null
@@ -69,6 +71,70 @@ async function verifyAdmin(event) {
 
 function needLogin() {
   return { ok: false, code: 'NEED_ADMIN_LOGIN', message: '管理登录已失效，请重新输入管理口令' }
+}
+
+// ==================== 管理员白名单 ====================
+async function getAdminMap() {
+  const map = {}
+  try {
+    const r = await db.collection(ADMIN_USERS_COLLECTION).limit(1000).get()
+    ;(r.data || []).forEach(function (u) {
+      if (u && u.openid) map[String(u.openid)] = u
+    })
+  } catch (e) {}
+  return map
+}
+
+async function setAdminAction(event, session) {
+  const ev = event || {}
+  const id = (ev.employeeId === undefined || ev.employeeId === null) ? '' : String(ev.employeeId).trim()
+  if (!id) return { ok: false, code: 'PARAM_EMPTY', message: '缺少 employeeId' }
+  let emp = null
+  try {
+    const r = await db.collection(EMPLOYEE_COLLECTION).doc(id).get()
+    emp = (r && r.data) || null
+  } catch (e) {
+    emp = null
+  }
+  if (!emp) return { ok: false, code: 'NOT_FOUND', message: '员工档案不存在' }
+  const openid = emp.openid ? String(emp.openid) : ''
+  if (!openid) return { ok: false, code: 'NO_OPENID', message: '该员工没有绑定微信 openid，无法设为管理员' }
+  const on = ev.admin === true
+  if (!on && String(session && session.openid) === openid) {
+    return { ok: false, code: 'CANNOT_DISABLE_SELF', message: '不能停用当前登录管理员自己的权限' }
+  }
+  try {
+    if (on) {
+      if (typeof db.createCollection === 'function') {
+        try { await db.createCollection(ADMIN_USERS_COLLECTION) } catch (e) {}
+      }
+      await db.collection(ADMIN_USERS_COLLECTION).doc(openid).set({
+        data: {
+          openid: openid,
+          name: emp.name || '',
+          role: 'admin',
+          enabled: true,
+          createdAt: db.serverDate(),
+          updatedAt: db.serverDate()
+        }
+      })
+    } else {
+      await db.collection(ADMIN_USERS_COLLECTION).doc(openid).update({
+        data: { enabled: false, updatedAt: db.serverDate() }
+      })
+      // 停用管理员时，立刻让其会话失效
+      try { await db.collection(SESSION_COLLECTION).where({ openid: openid }).remove() } catch (e) {}
+    }
+  } catch (e) {
+    return { ok: false, message: '保存管理员失败：' + ((e && e.message) || '请先创建 admin_users 集合') }
+  }
+  console.log('[employeeAdmin] setAdmin', JSON.stringify({
+    operator: maskOpenid(session && session.openid),
+    empNo: emp.empNo,
+    openid: maskOpenid(openid),
+    admin: on
+  }))
+  return { ok: true, data: { employeeId: id, openidMask: maskOpenid(openid), admin: on } }
 }
 
 // ==================== list ====================
@@ -187,9 +253,16 @@ async function listAction(event, session) {
     total: total,
     fallback: fallback
   }))
+  const adminMap = await getAdminMap()
+  const list = rows.map(function (d) {
+    const item = toListItem(d)
+    const admin = (d && d.openid) ? adminMap[String(d.openid)] : null
+    item.admin = !!(admin && admin.enabled !== false)
+    return item
+  })
   return {
     ok: true,
-    data: { list: rows.map(toListItem), total: total, page: page, pageSize: pageSize, fallback: fallback }
+    data: { list: list, total: total, page: page, pageSize: pageSize, fallback: fallback }
   }
 }
 
@@ -278,6 +351,7 @@ exports.main = async (event, context) => {
       return needLogin()
     }
     if (action === 'list') return await listAction(ev, session)
+    if (action === 'setAdmin') return await setAdminAction(ev, session)
     if (action === 'release') return await releaseAction(ev, session)
     return { ok: false, message: '未知操作：' + action }
   } catch (e) {

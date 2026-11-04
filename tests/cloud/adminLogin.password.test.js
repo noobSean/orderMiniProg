@@ -29,7 +29,7 @@ function scenario(opts) {
   const options = opts || {}
   const seed = Object.assign({}, options.seed)
   if (!seed.admin_sessions) {
-    seed.admin_sessions = [makeSession({ token: SESSION_TOKEN, expireAt: Date.now() + 3600 * 1000 })]
+    seed.admin_sessions = [makeSession({ token: SESSION_TOKEN, openid: 'openid_admin_user', expireAt: Date.now() + 3600 * 1000 })]
   }
   return createScenario({
     fn: 'adminLogin',
@@ -54,7 +54,7 @@ test('changePwd: 未登录（无 token / 无效 token / 过期 token）返回 NE
   res = await s.call({ action: 'changePwd', oldPwd: ENV_PWD, newPwd: 'NewPass123', adminToken: 'tok_bad' })
   assert.equal(res.code, 'NEED_ADMIN_LOGIN')
 
-  s = scenario({ seed: { admin_sessions: [makeSession({ token: SESSION_TOKEN, expireAt: Date.now() - 1 })] } })
+  s = scenario({ seed: { admin_sessions: [makeSession({ token: SESSION_TOKEN, openid: 'openid_admin_user', expireAt: Date.now() - 1 })] } })
   res = await change(s, ENV_PWD, 'NewPass123')
   assert.equal(res.code, 'NEED_ADMIN_LOGIN')
   assert.equal(s.count('admin_config'), 0)

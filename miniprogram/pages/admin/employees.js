@@ -101,6 +101,35 @@ Page({
     }.bind(this));
   },
 
+  // 设为/取消管理员：把该员工的微信 openid 加入管理白名单
+  onToggleAdmin(e) {
+    var ds = (e && e.currentTarget && e.currentTarget.dataset) || {};
+    var id = ds.id;
+    if (!id) return;
+    var isAdmin = ds.admin === true || ds.admin === 'true';
+    var label = (ds.no || '') + (ds.name ? ' ' + ds.name : '');
+    wx.showModal({
+      title: isAdmin ? '取消管理员' : '设为管理员',
+      content: isAdmin
+        ? '确定取消「' + label + '」的管理员权限？取消后该微信将看不到管理后台入口。'
+        : '确定把「' + label + '」设为管理员？该微信将能看到管理后台入口，并使用管理口令登录。',
+      confirmText: isAdmin ? '取消权限' : '设为管理员',
+      confirmColor: isAdmin ? '#fa5151' : '#ff6b35',
+      success: function (res) {
+        if (!res.confirm) return;
+        wx.showLoading({ title: '处理中', mask: true });
+        api.employeeAdmin('setAdmin', { employeeId: id, admin: !isAdmin }).then(function () {
+          wx.hideLoading();
+          wx.showToast({ title: isAdmin ? '已取消管理员' : '已设为管理员', icon: 'none' });
+          this.load(true);
+        }.bind(this)).catch(function (err) {
+          wx.hideLoading();
+          wx.showToast({ title: (err && err.message) || '操作失败', icon: 'none' });
+        });
+      }.bind(this)
+    });
+  },
+
   onRelease(e) {
     var ds = (e && e.currentTarget && e.currentTarget.dataset) || {};
     var id = ds.id;

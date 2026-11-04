@@ -55,13 +55,13 @@
     </view>
   </block>
 
-  <!-- 管理后台入口：无需先绑定员工账号，管理员输入口令即可进入 -->
-  <view class="admin-entry" bindtap="openAdmin">
+  <!-- 管理后台入口：仅管理员微信可见（首次无管理员时临时显示用于初始化） -->
+  <view wx:if="{{showAdmin}}" class="admin-entry" bindtap="openAdmin">
     <view class="admin-entry-main">
       <text class="admin-entry-title">管理后台</text>
       <text class="admin-entry-sub">{{adminSession ? '已登录管理端，点击进入' : '管理员输入口令进入'}}</text>
     </view>
     <text class="admin-entry-arrow">›</text>
   </view>
-  <view class="foot-tip muted">员工账号与管理员入口相互独立</view>
+  <view wx:if="{{showAdmin}}" class="foot-tip muted">员工账号与管理员入口相互独立{{adminBootstrap ? '（首次配置：登录后即绑定为管理员）' : ''}}</view>
 </view>

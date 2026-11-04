@@ -28,7 +28,7 @@
   margin: 0 !important;
   padding: 0 16rpx;
   height: 70rpx;
-  line-height: 70rpx;
+  line-height: 1;
   font-size: 25rpx;
   color: var(--primary);
   background: #fff;
@@ -36,5 +36,5 @@
   border-radius: 999rpx;
   box-sizing: border-box;
   white-space: nowrap;
-}
+ display: inline-flex; align-items: center; justify-content: center; text-align: center; }
 .notify-btn::after { border: none; }

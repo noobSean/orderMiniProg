@@ -29,9 +29,9 @@
   display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 18rpx;
   border-top: 2rpx solid var(--line); padding-top: 18rpx;
 }
-.mini-btn { height: 64rpx; line-height: 64rpx; font-size: 26rpx; padding: 0 30rpx; border-radius: 999rpx; margin: 0; box-sizing: border-box; }
+.mini-btn { height: 64rpx; line-height: 1; font-size: 26rpx; padding: 0 30rpx; border-radius: 999rpx; margin: 0; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; line-height: 1; text-align: center;}
 .mini-btn.primary { background: var(--primary); color: #fff; }
-.mini-btn.plain { background: #fff; color: var(--primary); border: 2rpx solid var(--primary); line-height: 60rpx; }
+.mini-btn.plain { background: #fff; color: var(--primary); border: 2rpx solid var(--primary); line-height: 1; }
 .mini-btn.danger { background: var(--danger); color: #fff; }
 .mini-btn::after { border: none; }
 

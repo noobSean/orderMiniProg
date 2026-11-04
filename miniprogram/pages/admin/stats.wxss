@@ -8,7 +8,7 @@
 .range-row { display: flex; align-items: center; gap: 12rpx; }
 .date-view { font-size: 28rpx; padding: 12rpx 20rpx; background: var(--bg); border-radius: 10rpx; }
 .sep { color: var(--text-weak); }
-.query-btn { height: 64rpx; line-height: 64rpx; font-size: 26rpx; padding: 0 28rpx; border-radius: 999rpx; background: var(--primary); color: #fff; margin-left: auto !important; box-sizing: border-box; }
+.query-btn { height: 64rpx; line-height: 1; font-size: 26rpx; padding: 0 28rpx; border-radius: 999rpx; background: var(--primary); color: #fff; margin-left: auto !important; box-sizing: border-box;  display: inline-flex; align-items: center; justify-content: center; text-align: center; }
 .query-btn::after { border: none; }
 
 .stat-grid { display: flex; flex-wrap: wrap; margin-top: 20rpx; }

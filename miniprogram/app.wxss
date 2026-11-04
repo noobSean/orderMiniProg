@@ -30,6 +30,7 @@ button {
   width: auto !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
+  text-align: center;
 }
 
 .page { min-height: 100vh; }

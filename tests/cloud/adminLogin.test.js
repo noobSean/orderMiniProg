@@ -158,19 +158,19 @@ test('adminLogin/verify: 无 token / 空 token 返回 valid:false', async () => 
 
 test('adminLogin/verify: 有效 token 返回 valid:true 与 expireAt', async () => {
   const expireAt = Date.now() + 60 * 1000
-  const s = loginScenario({ seed: { admin_sessions: [makeSession({ token: 'tok_valid', expireAt })] } })
+  const s = loginScenario({ seed: { admin_sessions: [makeSession({ token: 'tok_valid', openid: 'openid_admin_user', expireAt })] } })
   const res = await s.call({ action: 'verify', token: 'tok_valid' })
   assert.deepEqual(res, { ok: true, data: { valid: true, expireAt } })
 })
 
 test('adminLogin/verify: 已过期 token 返回 valid:false', async () => {
-  const s = loginScenario({ seed: { admin_sessions: [makeSession({ token: 'tok_expired', expireAt: Date.now() - 1 })] } })
+  const s = loginScenario({ seed: { admin_sessions: [makeSession({ token: 'tok_expired', openid: 'openid_admin_user', expireAt: Date.now() - 1 })] } })
   const res = await s.call({ action: 'verify', token: 'tok_expired' })
   assert.deepEqual(res, { ok: true, data: { valid: false } })
 })
 
 test('adminLogin/verify: 未知 token 返回 valid:false', async () => {
-  const s = loginScenario({ seed: { admin_sessions: [makeSession({ token: 'tok_known' })] } })
+  const s = loginScenario({ seed: { admin_sessions: [makeSession({ token: 'tok_known', openid: 'openid_admin_user' })] } })
   const res = await s.call({ action: 'verify', token: 'tok_unknown' })
   assert.deepEqual(res, { ok: true, data: { valid: false } })
 })
@@ -186,8 +186,8 @@ test('adminLogin/logout: 删除指定 token 的会话；无 token 时幂等返�
   const s = loginScenario({
     seed: {
       admin_sessions: [
-        makeSession({ token: 'tok_a' }),
-        makeSession({ token: 'tok_b' })
+        makeSession({ token: 'tok_a', openid: 'openid_admin_user' }),
+        makeSession({ token: 'tok_b', openid: 'openid_admin_user' })
       ]
     }
   })
@@ -202,7 +202,7 @@ test('adminLogin/logout: 删除指定 token 的会话；无 token 时幂等返�
 })
 
 test('adminLogin/logout: 数据库删除异常被吞掉，仍返回 done:true', async () => {
-  const s = loginScenario({ seed: { admin_sessions: [makeSession({ token: 'tok_a' })] } })
+  const s = loginScenario({ seed: { admin_sessions: [makeSession({ token: 'tok_a', openid: 'openid_admin_user' })] } })
   s.mock.failNext('admin_sessions', 'remove', new Error('remove failed'))
   const res = await s.call({ action: 'logout', token: 'tok_a' })
   assert.deepEqual(res, { ok: true, data: { done: true } })

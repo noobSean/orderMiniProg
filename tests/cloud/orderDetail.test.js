@@ -64,7 +64,7 @@ test('orderDetail: 他人订单 + 有效 adminToken 可以查看', async () => {
     openid: OTHER,
     seed: {
       orders: [baseOrder()],
-      admin_sessions: [makeSession({ token: ADMIN_TOKEN, openid: 'openid_admin', expireAt: Date.now() + 60000 })]
+      admin_sessions: [makeSession({ token: ADMIN_TOKEN, openid: OTHER, expireAt: Date.now() + 60000 })]
     }
   })
   const res = await s.call({ orderId: 'ord_1', adminToken: ADMIN_TOKEN })
@@ -85,7 +85,7 @@ test('orderDetail: 已过期 adminToken 被拒绝', async () => {
     openid: OTHER,
     seed: {
       orders: [baseOrder()],
-      admin_sessions: [makeSession({ token: ADMIN_TOKEN, expireAt: Date.now() - 1 })]
+      admin_sessions: [makeSession({ token: ADMIN_TOKEN, openid: OTHER, expireAt: Date.now() - 1 })]
     }
   })
   const res = await s.call({ orderId: 'ord_1', adminToken: ADMIN_TOKEN })
@@ -96,7 +96,7 @@ test('orderDetail: 已过期 adminToken 被拒绝', async () => {
 test('orderDetail: admin_sessions 查询异常时按无权限处理', async () => {
   const s = scenario({
     openid: OTHER,
-    seed: { orders: [baseOrder()], admin_sessions: [makeSession({ token: ADMIN_TOKEN })] }
+    seed: { orders: [baseOrder()], admin_sessions: [makeSession({ token: ADMIN_TOKEN, openid: OTHER })] }
   })
   s.mock.failNext('admin_sessions', 'get', new Error('session db down'))
   const res = await s.call({ orderId: 'ord_1', adminToken: ADMIN_TOKEN })

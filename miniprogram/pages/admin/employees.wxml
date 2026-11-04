@@ -40,7 +40,10 @@
         <view class="emp-sub muted">绑定时间 {{item.timeText}}</view>
         <view class="emp-sub muted emp-openid">openid {{item.openidMask || '—'}}</view>
       </view>
-      <view class="emp-release" data-id="{{item._id}}" data-no="{{item.empNo}}" data-name="{{item.name}}" bindtap="onRelease">解绑</view>
+      <view class="emp-actions">
+        <view class="emp-admin-toggle" data-id="{{item._id}}" data-no="{{item.empNo}}" data-name="{{item.name}}" data-admin="{{item.admin}}" bindtap="onToggleAdmin">{{item.admin ? '取消管理员' : '设为管理员'}}</view>
+        <view class="emp-release" data-id="{{item._id}}" data-no="{{item.empNo}}" data-name="{{item.name}}" bindtap="onRelease">解绑</view>
+      </view>
     </view>
 
     <view wx:if="{{loadingMore}}" class="emp-more muted">加载中…</view>

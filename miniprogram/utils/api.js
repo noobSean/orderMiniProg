@@ -157,6 +157,9 @@ function adminLogin(payload) {
   return call('adminLogin', data);
 }
 
+// 当前微信是否为管理员（只返回 isAdmin/bootstrap，不暴露敏感信息）
+function adminWhoami() { return call('adminLogin', { action: 'whoami' }); }
+
 // 校验管理会话是否有效（token 缺省取本地会话）
 function adminVerify(token) { return call('adminLogin', { action: 'verify', token: token || adminAuth.token() }); }
 
@@ -202,6 +205,7 @@ module.exports = {
   myOrders,
   orderDetail,
   adminLogin,
+  adminWhoami,
   adminVerify,
   adminChangePwd,
   adminLogout,

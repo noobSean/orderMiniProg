@@ -17,10 +17,11 @@ const FALLBACK = {
 
 async function checkAdmin(event) {
   const token = (event && event.adminToken) ? String(event.adminToken) : ''
+  const { OPENID } = cloud.getWXContext()
   if (!token) return { ok: false, code: 'NEED_ADMIN_LOGIN', message: '请先登录管理后台' }
   try {
     const res = await db.collection('admin_sessions')
-      .where({ token: token, expireAt: db.command.gt(Date.now()) })
+      .where({ token: token, openid: OPENID, expireAt: db.command.gt(Date.now()) })
       .limit(1).get()
     if (res.data && res.data.length) return null
   } catch (e) { console.error('[subscribeCheck] auth error', e && e.message) }
