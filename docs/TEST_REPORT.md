@@ -138,7 +138,7 @@
 
 稳定性：连续执行结果一致；测试不依赖网络、真实时间、随机值；Node 24 本地与 Node 22 / UTC（模拟 CI）均通过。
 
-> **CI 验证**：GitHub Actions `tests` 在 commit `2690428` 上运行通过（Node 22 / ubuntu-latest，418/418），（本报告提交前的代码 CI 运行 ID `41788148316`）。
+> **CI 验证**：GitHub Actions `tests` 在 commit `376f0f3` 上运行通过（Node 22 / ubuntu-latest，418/418），运行 ID `41792500538`。
 
 ---
 

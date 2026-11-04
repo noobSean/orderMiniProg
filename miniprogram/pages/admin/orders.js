@@ -203,14 +203,15 @@ Page({
     this._knownIds = null;
     this.setData({ refreshing: true, fetchError: '' });
     wx.showLoading({ title: '刷新中', mask: true });
+    let ok = false;
     try {
-      const ok = await this.verifySessionAndLoad();
-      if (ok) {
-        wx.showToast({ title: '已刷新', icon: 'success', duration: 800 });
-      }
+      ok = await this.verifySessionAndLoad();
     } finally {
       wx.hideLoading();
       this.setData({ refreshing: false });
+    }
+    if (ok) {
+      wx.showToast({ title: '已刷新', icon: 'success', duration: 800 });
     }
   },
 
