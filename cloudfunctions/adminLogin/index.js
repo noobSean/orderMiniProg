@@ -28,7 +28,7 @@ function genToken() {
 }
 
 // 首次使用时自动创建集合；已存在会报错，忽略即可。
-// 若云环境禁止云函数建集合，请在云开发控制台手动新建对应集合（权限：仅云函数可读写）。
+// 若云环境禁止云函数建集合，请在云开发控制台手动新建对应集合（客户端权限：所有用户不可读写；云函数不受数据库规则限制）。
 async function ensureCollection(name) {
   if (typeof db.createCollection !== 'function') return
   try {
@@ -241,7 +241,7 @@ async function login(event, OPENID) {
     try {
       await enableFirstAdmin(OPENID, (profile && profile.name) || '店主')
     } catch (e) {
-      return { ok: false, code: 'ADMIN_STORE_FAILED', message: '写管理员白名单失败，请先在云开发控制台创建 admin_users 集合（仅云函数可读写）' }
+      return { ok: false, code: 'ADMIN_STORE_FAILED', message: '写管理员白名单失败，请先在云开发控制台创建 admin_users 集合（客户端权限：所有用户不可读写）' }
     }
   } else {
     try {

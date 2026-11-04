@@ -21,7 +21,7 @@
 | orders | 订单 | orderNo, pickupNo, openid, type, buyer, items, total, originalTotal, discountAmount, discounts, delivery, status, paymentStatus(unpaid/paid), paidAt, pickedUpAt, cancelReason, statusHistory, createdAt, updatedAt |
 
 > 提示：云函数使用 `cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })`，会自动指向部署所在环境。
-> `admin_sessions` / `admin_config` / `admin_users` / `admin_attempts` 由 `adminLogin` 云函数首次登录/首次改密时自动创建（云环境不允许云函数建集合时请手动新建，权限设为「仅云函数可读写」）。
+> `admin_sessions` / `admin_config` / `admin_users` / `admin_attempts` 由 `adminLogin` 云函数首次登录/首次改密时自动创建（云环境不允许云函数建集合时请手动新建）。**客户端权限设为「所有用户不可读写」**（没有“仅云函数可读写”这个预设；云函数不受数据库安全规则限制）。
 >
 > **员工端登录**：员工没有账号密码，身份为微信 openid。小程序启动时调用 `login` 云函数按 openid 查询 `employees` 档案，查到即静默恢复登录（清缓存 / 换设备无需重新绑定），查不到才提示绑定；员工主动「退出登录」后需点「重新登录」恢复。管理员解绑或改资料后，员工端回到前台 / 下拉刷新会同步。
 
@@ -106,7 +106,8 @@
 见 `database/rules.json`（文字版建议，需在控制台逐集合配置）：
 - settings / menu_categories / dishes：允许任意登录用户 read（前端 getMenu / getSettings 直读）。
 - employees / orders：仅本人（openid == doc.openid）可读；所有写操作统一走云函数（服务端具备较高权限），客户端写权限请收紧为「仅创建者」或关闭。
-- admin_sessions / admin_config / admin_users / admin_attempts：客户端**完全不可读写**（仅云函数可读写），避免管理 token、密码哈希、白名单与失败计数泄露。
+- admin_sessions / admin_config / admin_users / admin_attempts：客户端权限设为「所有用户不可读写」（云函数不受规则限制），避免管理 token、密码哈希、白名单与失败计数泄露。
+- promotions / settings / menu_categories / dishes：客户端可读、不可写（写全部走云函数）；employees / orders / departments：客户端不可读写，全部走云函数。
 - promotions：**所有登录用户可读、仅云函数可写**（员工端菜单/购物车读取进行中的活动；活动增删改只走管理端 `promoAdmin` 云函数）。
 - 管理员鉴权在云函数端通过 `admin_sessions` 的 token 完成；不要在前端或数据库规则里用 `employees.admin` 判断管理员。
 

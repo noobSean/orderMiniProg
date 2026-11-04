@@ -87,7 +87,18 @@ order_recipe_miniprog/
 按 `database/README.md` 的说明，在云开发控制台「数据库」创建 11 个集合：
 `settings`、`menu_categories`、`dishes`、`departments`、`employees`、`orders`、`admin_sessions`、`admin_config`、`promotions`、`admin_users`、`admin_attempts`。
 
-> `admin_sessions` 保存管理端登录会话，`admin_config` 保存管理密码哈希，`admin_users` 保存管理员微信白名单，`admin_attempts` 保存登录失败次数（`adminLogin` 首次登录/首次改密时会尝试自动创建；若云环境不允许云函数建集合，请手动新建，权限均设为「仅云函数可读写」）。
+> `admin_sessions` 保存管理端登录会话，`admin_config` 保存管理密码哈希，`admin_users` 保存管理员微信白名单，`admin_attempts` 保存登录失败次数（`adminLogin` 首次登录/首次改密时会尝试自动创建；若云环境不允许云函数建集合，请手动新建）。
+
+> **数据库权限没有“仅云函数可读写”这个预设**。正确做法是：**客户端权限收紧到不可读写**，云函数使用管理员权限，不受数据库安全规则限制。推荐配置：
+>
+> | 集合 | 权限设置 |
+> | --- | --- |
+> | `admin_sessions` / `admin_config` / `admin_users` / `admin_attempts` | **所有用户不可读写**（或自定义规则 `{"read":false,"write":false}`） |
+> | `promotions` | **所有用户可读**（写由 `promoAdmin` 云函数完成） |
+> | `settings` / `menu_categories` / `dishes` | **所有用户可读**（员工端需要直接读取菜单/配置；写全部走云函数） |
+> | `departments` / `employees` / `orders` | **所有用户不可读写**（全部读写都走云函数） |
+>
+> 如果新建集合时只有「所有用户可读，仅创建者可读写」等选项，请选「所有用户不可读写」，或进入「权限设置 → 自定义安全规则」填 `{"read":false,"write":false}`。云函数自动创建的集合也要检查一遍权限。
 
 - **推荐直接导入本项目内置测试数据**（见文末「附录 A」），无需手写。
 - 也可手动写入：`settings` 一条门店配置；`menu_categories`、`dishes` 示例菜品（见 `database/README.md`）。
@@ -335,7 +346,7 @@ await upload.remove(fileID);
 - 先在云函数 `adminLogin` 的**环境变量**配置初始口令 `ADMIN_PWD`（不要写进代码或小程序端）；首个用该口令登录的微信会自动绑定为管理员，之后在「修改密码」里改成强密码（数据库哈希优先，环境变量仅作初始化/重置兜底）。
 - 管理入口默认只对 `admin_users` 白名单内的微信显示；店员在「员工绑定」页点「设为管理员」后生效。
 - 登录连续失败 5 次会锁定该微信 10 分钟；所有管理云函数都会校验会话 openid 与调用者一致。
-- 云函数内所有管理接口都用 `adminToken` 会话校验（`checkAdmin`），请勿移除；`admin_sessions` 集合权限设为「仅云函数可读写」。
+- 云函数内所有管理接口都用 `adminToken` 会话校验（`checkAdmin`），请勿移除；`admin_sessions` 等管理集合的客户端权限设为「所有用户不可读写」（云函数不受数据库安全规则限制）。
 - 管理会话默认 12 小时，可在 `adminLogin/index.js` 的 `SESSION_TTL` 调整。
 - 云存储权限保持「所有用户可读，仅创建者可写」；定期清理 `dishes/` 下的孤儿文件（可选）。
 - 若上线后需通知推送，再按需申请企业认证 + 订阅消息模板。
